@@ -1,13 +1,19 @@
 resource "proxmox_virtual_environment_download_file" "talos_cloud_image" {
-  content_type = "iso"
-  datastore_id = "local"
-  node_name    = var.target_node_name
-  url          = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v1.12.5/nocloud-amd64.iso"
-  file_name    = "talos-v1.12.5-no-cloud-qemu-guest-amd64.img"
+  content_type          = "iso"
+  datastore_id          = "local"
+  node_name             = var.target_node_name
+  url                   = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v1.12.5/nocloud-amd64.raw.zst"
+  decompression_algorithm = "zst"
+  file_name             = "talos-v1.12.5-nocloud-qemu-guest-amd64.img"
+
+  lifecycle {
+    ignore_changes = all
+  }
 }
 
 resource "proxmox_virtual_environment_vm" "talos_control_plane" {
   name      = "talos-controlplane-01"
+  vm_id     = 1000
   node_name = var.target_node_name
 
   tags = ["terraform", "k8s"]
@@ -15,7 +21,7 @@ resource "proxmox_virtual_environment_vm" "talos_control_plane" {
   stop_on_destroy = true
 
   agent {
-    enabled = true 
+    enabled = true
   }
 
   cpu {
@@ -52,12 +58,17 @@ resource "proxmox_virtual_environment_vm" "talos_control_plane" {
   operating_system {
     type = "l26"
   }
+
+  lifecycle {
+    ignore_changes = [disk[0].file_id]
+  }
 }
 
 resource "proxmox_virtual_environment_vm" "talos_worker" {
   count = 2
 
   name      = "talos-worker-${format("%02d", count.index + 1)}"
+  vm_id     = 1010 + count.index
   node_name = var.target_node_name
 
   tags = ["terraform", "k8s"]
@@ -74,7 +85,7 @@ resource "proxmox_virtual_environment_vm" "talos_worker" {
   }
 
   memory {
-    dedicated = 2048
+    dedicated = 4096
   }
 
   disk {
@@ -101,5 +112,9 @@ resource "proxmox_virtual_environment_vm" "talos_worker" {
 
   operating_system {
     type = "l26"
+  }
+
+  lifecycle {
+    ignore_changes = [disk[0].file_id]
   }
 }

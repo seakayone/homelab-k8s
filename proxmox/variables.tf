@@ -31,3 +31,8 @@ variable "target_node_name" {
 variable "target_node_ip" {
   type = string
 }
+
+variable "cluster_name" {
+  type    = string
+  default = "talos-cluster"
+}
