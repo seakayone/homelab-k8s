@@ -8,19 +8,22 @@ terraform {
 }
 
 provider "proxmox" {
-  endpoint = var.endpoint
+  endpoint  = var.endpoint
   api_token = var.api_token
-  username = var.tf_username
-  #password = var.tf_password
+  username  = var.tf_username
   ssh {
-    agent    = true
-    username = var.ssh_agent_username
-    #password = var.ssh_agent_password
-    private_key = file(var.ssh_private_key_path)
+    agent       = true
+    username    = var.ssh_agent_username
+    private_key = file(pathexpand(var.ssh_private_key_path))
     node {
       name    = var.target_node_name
       address = var.target_node_ip
-      port    = var.target_node_port
+      port    = 22
     }
   }
+}
+
+module "proxmox" {
+  source           = "./proxmox"
+  target_node_name = var.target_node_name
 }
