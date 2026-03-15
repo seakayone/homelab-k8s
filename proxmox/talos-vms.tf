@@ -5,6 +5,7 @@ resource "proxmox_virtual_environment_download_file" "talos_cloud_image" {
   url                     = "https://factory.talos.dev/image/ce4c980550dd2ab1b17bbf2b08801c7eb59418eafe8f279833297925d67c7515/v1.12.5/nocloud-amd64.raw.zst"
   decompression_algorithm = "zst"
   file_name               = "talos-v1.12.5-nocloud-qemu-guest-amd64.img"
+  overwrite               = false
 }
 
 resource "proxmox_virtual_environment_vm" "talos_control_plane" {
