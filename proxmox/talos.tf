@@ -1,6 +1,6 @@
 locals {
-  cp_ip            = [for addr in flatten(proxmox_virtual_environment_vm.talos_control_plane.ipv4_addresses) : addr if addr != "127.0.0.1"][0]
-  worker_ips       = [for vm in proxmox_virtual_environment_vm.talos_worker : [for addr in flatten(vm.ipv4_addresses) : addr if addr != "127.0.0.1"][0]]
+  cp_ip            = [for addr in flatten(proxmox_virtual_environment_vm.talos_control_plane.ipv4_addresses) : addr if addr != "127.0.0.1" && !startswith(addr, "169.254.") && !startswith(addr, "10.244.")][0]
+  worker_ips       = [for vm in proxmox_virtual_environment_vm.talos_worker : [for addr in flatten(vm.ipv4_addresses) : addr if addr != "127.0.0.1" && !startswith(addr, "169.254.") && !startswith(addr, "10.244.")][0]]
   cluster_endpoint = "https://${local.cp_ip}:6443"
 }
 
