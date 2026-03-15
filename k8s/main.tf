@@ -44,12 +44,17 @@ resource "helm_release" "argocd" {
 
   set {
     name  = "configs.repositories.argocd-repo.url"
-    value = var.argocd_repo_url
+    value = var.argocd_repo_url_internal
   }
 
   set {
     name  = "configs.repositories.argocd-repo.type"
     value = "git"
+  }
+
+  set {
+    name  = "configs.repositories.argocd-repo.insecure"
+    value = "true"
   }
 
   set_sensitive {
@@ -69,7 +74,7 @@ resource "helm_release" "argocd" {
         namespace = "argocd"
         project   = "default"
         source = {
-          repoURL        = var.argocd_repo_url
+          repoURL        = var.argocd_repo_url_internal
           targetRevision = "HEAD"
           path           = "apps"
         }
@@ -89,7 +94,7 @@ resource "helm_release" "argocd" {
       projects = {
         default = {
           description = "Default project"
-          sourceRepos = [var.argocd_repo_url]
+          sourceRepos = [var.argocd_repo_url_internal]
           destinations = [{
             server    = "https://kubernetes.default.svc"
             namespace = "*"

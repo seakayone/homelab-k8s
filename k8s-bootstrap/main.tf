@@ -6,6 +6,10 @@ terraform {
       source  = "hashicorp/helm"
       version = "~> 2.17"
     }
+    kubectl = {
+      source  = "alekc/kubectl"
+      version = "~> 2.1"
+    }
     null = {
       source  = "hashicorp/null"
       version = "~> 3.2"
@@ -35,6 +39,43 @@ resource "helm_release" "tailscale_operator" {
     name  = "apiServerProxyConfig.mode"
     value = "true"
   }
+}
+
+resource "kubectl_manifest" "tailscale_egress_proxy_group" {
+  yaml_body = yamlencode({
+    apiVersion = "tailscale.com/v1alpha1"
+    kind       = "ProxyGroup"
+    metadata = {
+      name = "egress"
+    }
+    spec = {
+      type     = "Egress"
+      replicas = 1
+    }
+  })
+
+  depends_on = [helm_release.tailscale_operator]
+}
+
+resource "kubectl_manifest" "tailscale_egress_git_service" {
+  yaml_body = yamlencode({
+    apiVersion = "v1"
+    kind       = "Service"
+    metadata = {
+      name      = "ts-git-organa-one"
+      namespace = "tailscale"
+      annotations = {
+        "tailscale.com/proxy-group"  = "egress"
+        "tailscale.com/tailnet-fqdn" = "git.organa.one"
+      }
+    }
+    spec = {
+      type         = "ExternalName"
+      externalName = "placeholder"
+    }
+  })
+
+  depends_on = [helm_release.tailscale_operator]
 }
 
 resource "null_resource" "tailscale_kubeconfig" {
