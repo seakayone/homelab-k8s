@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+just kubeconfig
+
 # install the tailscale-operator
+helm repo update
 helm upgrade \
   --install \
   tailscale-operator \
@@ -19,4 +22,3 @@ tailscale configure kubeconfig tailscale-operator
 # install Argo CD
 kubectl create namespace argocd
 kubectl apply -n argocd --server-side --force-conflicts -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-
