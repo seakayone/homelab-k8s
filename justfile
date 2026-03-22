@@ -19,3 +19,8 @@ destroy-and-setup:
     just apply
     just kubeconfig
     just talosconfig
+    cd manifests/tailscale-operator && ./apply.sh
+    kubectl -n tailscale wait --for=condition=available deployment/operator --timeout=180s
+    tailscale configure kubeconfig tailscale-operator
+    kubectl get nodes
+    
