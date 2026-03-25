@@ -26,3 +26,8 @@ destroy-and-setup:
     
 argocd-initial-admin-secret:
     kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" 2>/dev/null | base64 -d && echo
+
+argocd-update-admin-secret:
+   argocd login ${ARGOCD_SERVER} --username admin --grpc-web
+   argocd account update-password --grpc-web
+
