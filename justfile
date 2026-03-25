@@ -1,3 +1,7 @@
+# List all available recipes
+default:
+    @just --list
+
 # Extract talosconfig from tofu state and write to ~/.talos/config
 talosconfig:
     mkdir -p ~/.talos
@@ -11,9 +15,10 @@ kubeconfig:
     @echo "Wrote kubeconfig to ~/.kube/config"
 
 # Apply tofu changes without confirmation
-apply:
+tf-apply:
     tofu apply -auto-approve
 
+# Destroy all VMs and rebuild the cluster from scratch
 destroy-and-setup:
     ./scripts/destroy.sh
     just apply
@@ -24,9 +29,11 @@ destroy-and-setup:
     tailscale configure kubeconfig tailscale-operator
     kubectl get nodes
     
+# Print the ArgoCD initial admin password
 argocd-initial-admin-secret:
     kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" 2>/dev/null | base64 -d && echo
 
+# Log in to ArgoCD and update the admin password
 argocd-update-admin-secret:
    argocd login ${ARGOCD_SERVER} --username admin --grpc-web
    argocd account update-password --grpc-web
