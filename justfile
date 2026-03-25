@@ -24,3 +24,5 @@ destroy-and-setup:
     tailscale configure kubeconfig tailscale-operator
     kubectl get nodes
     
+argocd-initial-admin-secret:
+    kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" 2>/dev/null | base64 -d && echo
