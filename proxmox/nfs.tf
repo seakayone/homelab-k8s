@@ -1,23 +1,43 @@
-resource "proxmox_virtual_environment_download_file" "debian_12_lxc_template" {
-  content_type = "vztmpl"
-  datastore_id = "local"
-  node_name    = var.target_node_name
-  url          = "http://download.proxmox.com/images/system/debian-12-standard_12.12-1_amd64.tar.zst"
-}
-
-resource "proxmox_virtual_environment_container" "nfs_server" {
-  description = "NFS server for Kubernetes persistent volumes"
-
-  node_name = var.target_node_name
+resource "proxmox_virtual_environment_vm" "nfs_server" {
+  name      = "nfs-server"
   vm_id     = 2000
+  node_name = var.target_node_name
+
+  description = "NFS server for Kubernetes persistent volumes"
 
   tags = ["nfs", "terraform"]
 
-  unprivileged  = false
-  start_on_boot = true
+  stop_on_destroy = true
+
+  agent {
+    enabled = false
+  }
+
+  cpu {
+    cores = 1
+    type  = "x86-64-v2-AES"
+  }
+
+  memory {
+    dedicated = 1024
+  }
+
+  disk {
+    datastore_id = "local-lvm"
+    file_id      = "local:iso/debian-12-genericcloud-amd64.img"
+    interface    = "scsi0"
+    size         = 20
+    discard      = "on"
+  }
+
+  network_device {
+    bridge = "vmbr0"
+  }
 
   initialization {
-    hostname = "nfs-server"
+    dns {
+      servers = [var.network_gateway]
+    }
 
     ip_config {
       ipv4 {
@@ -27,47 +47,30 @@ resource "proxmox_virtual_environment_container" "nfs_server" {
     }
 
     user_account {
-      keys = [trimspace(file(pathexpand(var.ssh_public_key_path)))]
+      username = "debian"
+      keys     = [trimspace(file(pathexpand(var.ssh_public_key_path)))]
     }
   }
 
-  cpu {
-    cores = 1
-  }
-
-  memory {
-    dedicated = 512
-  }
-
-  disk {
-    datastore_id = "local-lvm"
-    size         = 20
-  }
-
-  network_interface {
-    name   = "eth0"
-    bridge = "vmbr0"
-  }
+  serial_device {}
 
   operating_system {
-    template_file_id = proxmox_virtual_environment_download_file.debian_12_lxc_template.id
-    type             = "debian"
+    type = "l26"
   }
 }
 
 resource "terraform_data" "nfs_provisioner" {
-  depends_on = [proxmox_virtual_environment_container.nfs_server]
+  depends_on = [proxmox_virtual_environment_vm.nfs_server]
 
-  triggers_replace = [proxmox_virtual_environment_container.nfs_server.vm_id]
+  triggers_replace = [proxmox_virtual_environment_vm.nfs_server.vm_id]
 
   provisioner "local-exec" {
     command = "bash ${path.module}/../scripts/provision-nfs.sh"
 
     environment = {
-      SSH_KEY_PATH = pathexpand(var.ssh_private_key_path)
-      SSH_USER     = var.ssh_agent_username
-      PROXMOX_HOST = var.target_node_ip
-      CONTAINER_ID = "2000"
+      SSH_KEY_PATH   = pathexpand(var.ssh_private_key_path)
+      NFS_SERVER_IP  = "192.168.178.200"
+      NFS_SERVER_USER = "debian"
     }
   }
 }
