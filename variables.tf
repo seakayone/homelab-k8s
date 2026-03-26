@@ -31,3 +31,7 @@ variable "target_port" {
   type    = string
   default = "8006"
 }
+
+variable "network_gateway" {
+  type = string
+}

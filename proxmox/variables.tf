@@ -36,3 +36,7 @@ variable "cluster_name" {
   type    = string
   default = "talos-cluster"
 }
+
+variable "network_gateway" {
+  type = string
+}
