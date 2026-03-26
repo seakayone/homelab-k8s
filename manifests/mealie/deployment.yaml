@@ -26,7 +26,7 @@ spec:
             - name: TZ
               value: Europe/Zurich
             - name: BASE_URL
-              value: https://mealie.lungfish-ide.ts.net
+              value: https://mealie.organa.one
           volumeMounts:
             - name: data
               mountPath: /app/data
