@@ -11,4 +11,5 @@ module "proxmox" {
   ssh_private_key_path = var.ssh_private_key_path
   target_node_name     = var.target_node_name
   target_node_ip       = var.target_node_ip
+  network_gateway      = var.network_gateway
 }
