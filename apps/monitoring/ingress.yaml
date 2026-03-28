@@ -7,6 +7,9 @@ metadata:
     tailscale.com/funnel: "false"
 spec:
   ingressClassName: tailscale
+  tls:
+    - hosts:
+        - grafana
   rules:
     - host: grafana
       http:
