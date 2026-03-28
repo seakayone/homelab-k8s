@@ -38,3 +38,7 @@ argocd-update-admin-secret:
    argocd login ${ARGOCD_SERVER} --username admin --grpc-web
    argocd account update-password --grpc-web
 
+# Print the Grafana initial admin password
+grafana-initial-admin-secret:
+    kubectl get secret kube-prometheus-stack-grafana -n monitoring -o jsonpath="{.data.admin-password}" 2>/dev/null | base64 -d && echo
+
