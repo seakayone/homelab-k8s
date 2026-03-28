@@ -21,13 +21,23 @@ tf-apply:
 # Destroy all VMs and rebuild the cluster from scratch
 destroy-and-setup:
     ./scripts/destroy.sh
-    just apply
+    just tf-apply
     just kubeconfig
     just talosconfig
     cd manifests/tailscale-operator && ./apply.sh
     kubectl -n tailscale wait --for=condition=available deployment/operator --timeout=180s
-    tailscale configure kubeconfig tailscale-operator
-    kubectl get nodes
+    @echo "Waiting for tailscale-operator peer to appear..."
+    @for i in $(seq 1 60); do \
+        tailscale configure kubeconfig tailscale-operator 2>/dev/null && break || true; \
+        echo "  Attempt $$i/60 - peer not yet visible, waiting 5s..."; \
+        sleep 5; \
+    done
+    @echo "Waiting for kubectl to become responsive..."
+    @for i in $(seq 1 30); do \
+        kubectl get nodes 2>/dev/null && break || true; \
+        echo "  Attempt $$i/30 - API not yet responsive, waiting 5s..."; \
+        sleep 5; \
+    done
     
 # Print the ArgoCD initial admin password
 argocd-initial-admin-secret:

@@ -1,3 +1,12 @@
+resource "proxmox_virtual_environment_download_file" "debian_cloud_image" {
+  content_type = "iso"
+  datastore_id = "local"
+  node_name    = var.target_node_name
+  url          = "https://cloud.debian.org/images/cloud/bookworm/latest/debian-12-genericcloud-amd64.qcow2"
+  file_name    = "debian-12-genericcloud-amd64.img"
+  overwrite    = false
+}
+
 resource "proxmox_virtual_environment_vm" "nfs_server" {
   name      = "nfs-server"
   vm_id     = 2000
@@ -19,12 +28,13 @@ resource "proxmox_virtual_environment_vm" "nfs_server" {
   }
 
   memory {
-    dedicated = 512 
+    dedicated = 512
   }
 
   disk {
     datastore_id = "local-lvm"
-    file_id      = "local:iso/debian-12-genericcloud-amd64.img"
+    file_id      = proxmox_virtual_environment_download_file.debian_cloud_image.id
+    file_format  = "raw"
     interface    = "scsi0"
     size         = 20
     discard      = "on"
