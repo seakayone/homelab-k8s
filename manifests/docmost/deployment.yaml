@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: docmost
+  namespace: docmost
+  labels:
+    app: docmost
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: docmost
+  template:
+    metadata:
+      labels:
+        app: docmost
+    spec:
+      initContainers:
+        - name: wait-for-db
+          image: busybox:1.37
+          command: ['sh', '-c', 'until nc -z docmost-db 5432; do echo waiting for postgres; sleep 2; done']
+        - name: wait-for-redis
+          image: busybox:1.37
+          command: ['sh', '-c', 'until nc -z docmost-redis 6379; do echo waiting for redis; sleep 2; done']
+      containers:
+        - name: docmost
+          image: docmost/docmost:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: APP_URL
+              value: "https://docmost.lungfish-ide.ts.net"
+            - name: APP_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: docmost-secrets
+                  key: APP_SECRET
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: docmost-secrets
+                  key: DATABASE_URL
+            - name: REDIS_URL
+              value: "redis://docmost-redis:6379"
+          volumeMounts:
+            - name: docmost-data
+              mountPath: /app/data/storage
+          resources:
+            requests:
+              memory: 256Mi
+              cpu: 250m
+            limits:
+              memory: 1Gi
+      volumes:
+        - name: docmost-data
+          persistentVolumeClaim:
+            claimName: docmost-data
