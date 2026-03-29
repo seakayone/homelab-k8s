@@ -22,6 +22,7 @@ spec:
             type: filesystem
           compactor:
             retention_enabled: true
+            delete_request_store: filesystem
           limits_config:
             retention_period: 30d
           schemaConfig:
