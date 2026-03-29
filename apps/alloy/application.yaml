@@ -67,6 +67,9 @@ spec:
             varlog: true
             dockercontainers: true
 
+          initialDelaySeconds: 60
+          timeoutSeconds: 10
+
           resources:
             requests:
               cpu: 50m
