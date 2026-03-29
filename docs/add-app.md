@@ -2,6 +2,8 @@
 
 This guide walks through adding a new application to the cluster. The pattern is: manifests in `manifests/<app>/`, an ArgoCD Application in `apps/<app>/application.yaml`, optional Sealed Secrets for credentials, a Tailscale Ingress for access, and an entry in the Homepage dashboard.
 
+See [Example: it-tools](#example-it-tools) at the bottom for a complete worked example.
+
 ---
 
 ## 1. Create the manifests
@@ -173,21 +175,156 @@ Set `tailscale.com/funnel: "true"` only if the service must be reachable from th
 
 ## 5. Add to Homepage
 
-Edit `manifests/homepage/configmap.yaml` and add an entry under `services.yaml`. ArgoCD syncs the ConfigMap and Homepage reloads it automatically.
+Edit `manifests/homepage/config/services.yaml` and append an entry under the `Homelab` group:
 
 ```yaml
-data:
-  services.yaml: |
-    - Homelab:
-        # ... existing entries ...
-        - My App:
-            href: https://<hostname>.lungfish-ide.ts.net
-            description: Short description
-            icon: <app>.png   # or a URL; see https://gethomepage.dev/configs/services/
+- Homelab:
+    # ... existing entries ...
+    - My App:
+        href: https://<hostname>.lungfish-ide.ts.net
+        description: Short description
+        icon: <app>.png   # or a URL; see https://gethomepage.dev/configs/services/
 ```
+
+The Homepage ConfigMap is generated from this file via Kustomize `configMapGenerator`. Committing the change produces a new ConfigMap hash, which triggers a rolling restart of the Homepage pod so the new entry appears immediately.
 
 Icons are resolved from the [Dashboard Icons](https://github.com/walkxcode/dashboard-icons) library by name. Use a full URL if the app is not in that library:
 
 ```yaml
 icon: https://example.com/logo.png
 ```
+
+---
+
+## Example: it-tools
+
+[it-tools](https://github.com/CorentinTh/it-tools) is a stateless web app (collection of developer utilities) — no database, no persistent storage, no secrets. It is the simplest possible app to add.
+
+**Files created:**
+
+```
+manifests/it-tools/
+  deployment.yaml
+  service.yaml
+  ingress.yaml
+apps/it-tools/
+  application.yaml
+```
+
+### `manifests/it-tools/deployment.yaml`
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: it-tools
+  namespace: it-tools
+  labels:
+    app: it-tools
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: it-tools
+  template:
+    metadata:
+      labels:
+        app: it-tools
+    spec:
+      containers:
+        - name: it-tools
+          image: corentinth/it-tools:latest
+          ports:
+            - containerPort: 80
+          resources:
+            requests:
+              memory: 64Mi
+              cpu: 50m
+            limits:
+              memory: 128Mi
+```
+
+### `manifests/it-tools/service.yaml`
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: it-tools
+  namespace: it-tools
+  labels:
+    app: it-tools
+spec:
+  selector:
+    app: it-tools
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+```
+
+### `manifests/it-tools/ingress.yaml`
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: it-tools
+  namespace: it-tools
+  annotations:
+    tailscale.com/funnel: "false"
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: it-tools
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: it-tools
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - it-tools
+```
+
+### `apps/it-tools/application.yaml`
+
+```yaml
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: it-tools
+  namespace: argocd
+  finalizers:
+    - resources-finalizer.argocd.argoproj.io
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/seakayone/homelab-k8s.git
+    targetRevision: main
+    path: manifests/it-tools
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: it-tools
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+```
+
+### Homepage entry (`manifests/homepage/config/services.yaml`)
+
+```yaml
+- IT-Tools:
+    href: https://it-tools.lungfish-ide.ts.net
+    description: Collection of handy online tools for developers
+    icon: it-tools.png
+```
+
+The app is accessible at `https://it-tools.lungfish-ide.ts.net` once ArgoCD syncs.
