@@ -33,18 +33,6 @@ data:
             description: Wiki and documentation
             icon: docmost.png
   widgets.yaml: |
-    - kubernetes:
-        cluster:
-          show: true
-          cpu: false
-          memory: false
-          showLabel: true
-          label: "homelab"
-        nodes:
-          show: true
-          cpu: false
-          memory: false
-          showLabel: true
     - search:
         provider: duckduckgo
         target: _blank
