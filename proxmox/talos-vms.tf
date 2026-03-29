@@ -78,7 +78,7 @@ resource "proxmox_virtual_environment_vm" "talos_worker" {
   }
 
   memory {
-    dedicated = 8192
+    dedicated = 10240
   }
 
   disk {
