@@ -28,7 +28,7 @@ resource "proxmox_virtual_environment_vm" "nfs_server" {
   }
 
   memory {
-    dedicated = 512
+    dedicated = 1024
   }
 
   disk {
