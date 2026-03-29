@@ -85,7 +85,7 @@ resource "proxmox_virtual_environment_vm" "talos_worker" {
     datastore_id = "local-lvm"
     file_id      = proxmox_virtual_environment_download_file.talos_cloud_image.id
     interface    = "scsi0"
-    size         = 10
+    size         = 30
     discard      = "on"
   }
 
