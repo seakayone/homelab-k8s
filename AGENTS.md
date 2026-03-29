@@ -69,6 +69,8 @@ apps/                                            — ArgoCD Application definiti
   │     └── application.yaml               — Grafana Alloy DaemonSet (pod log collection → Loki)
   ├── mealie/
   │     └── application.yaml               — Mealie recipe manager from manifests/mealie/
+  ├── sealed-secrets/
+  │     └── application.yaml               — Sealed-secrets controller (Bitnami Helm chart v2.18.4)
   └── nfs-csi/
         └── application.yaml               — NFS CSI driver (default StorageClass "nfs")
 
@@ -101,4 +103,56 @@ manifests/
 - **Tailscale operator**: Deployed via Kustomize with API server proxy mode.
 - **NFS storage**: Default StorageClass `nfs` backed by NFS server at 192.168.178.200:/export/k8s. Used by Loki (3Gi), Prometheus (5Gi), Grafana (2Gi), Mealie PVC.
 - **Observability stack**: kube-prometheus-stack (Prometheus + Grafana + Alertmanager) + Loki + Grafana Alloy for log collection.
+- **Sealed Secrets**: Bitnami sealed-secrets controller in `kube-system` namespace. Allows encrypting Kubernetes Secrets so they can be safely committed to Git. ArgoCD-managed via Helm chart.
 - Terraform state is local (not remote). `destroy.sh` wipes state files directly.
+
+## Sealed Secrets
+
+[Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) encrypts Kubernetes Secrets client-side so they can be stored in Git. The controller in-cluster decrypts them back into regular Secrets.
+
+### Workflow
+
+1. **Create a plain Kubernetes Secret** (do NOT commit this):
+   ```yaml
+   # my-secret.yaml
+   apiVersion: v1
+   kind: Secret
+   metadata:
+     name: my-secret
+     namespace: default
+   type: Opaque
+   stringData:
+     password: "super-secret-value"
+   ```
+
+2. **Seal it** using the `just` task:
+   ```bash
+   just seal-secret my-secret.yaml > my-sealed-secret.yaml
+   ```
+   This runs `kubeseal` against the cluster's controller to produce a `SealedSecret` resource encrypted with the controller's public key.
+
+3. **Commit the SealedSecret** (`my-sealed-secret.yaml`) to Git. ArgoCD syncs it to the cluster, and the controller decrypts it into a regular Secret.
+
+4. **Delete the plain Secret file** — only the sealed version belongs in the repo.
+
+### Key Backup & Restore
+
+The controller's encryption key is critical — if lost, existing SealedSecrets cannot be decrypted.
+
+```bash
+# Backup the key (store securely, NEVER commit)
+just backup-sealed-secrets-key
+# → writes sealed-secrets-key-backup.yaml (gitignored)
+
+# Restore the key (before deploying controller on a new cluster)
+kubectl apply -f sealed-secrets-key-backup.yaml
+# Then restart the controller to pick up the restored key
+kubectl delete pod -n kube-system -l app.kubernetes.io/name=sealed-secrets-controller
+```
+
+### Key Details
+
+- **Controller**: `sealed-secrets-controller` in `kube-system` (Helm chart v2.18.4)
+- **CLI tool**: `kubeseal` (version managed by `.mise.toml`)
+- **Key backup file**: `sealed-secrets-key-backup.yaml` (gitignored)
+- Secrets are scoped to a specific name + namespace by default (cannot be reused elsewhere)
