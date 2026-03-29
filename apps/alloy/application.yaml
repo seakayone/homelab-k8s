@@ -80,9 +80,6 @@ spec:
 
         controller:
           type: daemonset
-          tolerations:
-            - operator: Exists
-              effect: NoSchedule
 
         serviceAccount:
           create: true
