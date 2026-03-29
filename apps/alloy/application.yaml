@@ -63,8 +63,24 @@ spec:
                 }
               }
 
+          extraVolumeMounts:
+            - name: varlogpods
+              mountPath: /var/log/pods
+              readOnly: true
+            - name: varlibdockercontainers
+              mountPath: /var/lib/docker/containers
+              readOnly: true
+
         controller:
           type: daemonset
+
+        extraVolumes:
+          - name: varlogpods
+            hostPath:
+              path: /var/log/pods
+          - name: varlibdockercontainers
+            hostPath:
+              path: /var/lib/docker/containers
 
         serviceAccount:
           create: true
@@ -83,22 +99,6 @@ spec:
         tolerations:
           - operator: Exists
             effect: NoSchedule
-
-        volumeMounts:
-          - name: varlogpods
-            mountPath: /var/log/pods
-            readOnly: true
-          - name: varlibdockercontainers
-            mountPath: /var/lib/docker/containers
-            readOnly: true
-
-        volumes:
-          - name: varlogpods
-            hostPath:
-              path: /var/log/pods
-          - name: varlibdockercontainers
-            hostPath:
-              path: /var/lib/docker/containers
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
