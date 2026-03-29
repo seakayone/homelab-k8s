@@ -19,7 +19,7 @@ data:
         - ArgoCD:
             href: https://argocd.lungfish-ide.ts.net
             description: GitOps continuous delivery
-            icon: argo-cd.png
+            icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/argo-cd.png
         - Grafana:
             href: https://grafana.lungfish-ide.ts.net
             description: Metrics and dashboards
