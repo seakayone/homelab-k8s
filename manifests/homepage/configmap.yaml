@@ -13,6 +13,7 @@ data:
   custom.js: ""
   bookmarks.yaml: ""
   docker.yaml: ""
+  proxmox.yaml: ""
   services.yaml: |
     - Homelab:
         - ArgoCD:
