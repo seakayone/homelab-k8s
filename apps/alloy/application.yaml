@@ -63,42 +63,29 @@ spec:
                 }
               }
 
-          extraVolumeMounts:
-            - name: varlogpods
-              mountPath: /var/log/pods
-              readOnly: true
-            - name: varlibdockercontainers
-              mountPath: /var/lib/docker/containers
-              readOnly: true
+          mounts:
+            varlog: true
+            dockercontainers: true
+
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 200m
+              memory: 128Mi
 
         controller:
           type: daemonset
-
-        extraVolumes:
-          - name: varlogpods
-            hostPath:
-              path: /var/log/pods
-          - name: varlibdockercontainers
-            hostPath:
-              path: /var/lib/docker/containers
+          tolerations:
+            - operator: Exists
+              effect: NoSchedule
 
         serviceAccount:
           create: true
 
         rbac:
           create: true
-
-        resources:
-          requests:
-            cpu: 50m
-            memory: 64Mi
-          limits:
-            cpu: 200m
-            memory: 128Mi
-
-        tolerations:
-          - operator: Exists
-            effect: NoSchedule
   destination:
     server: https://kubernetes.default.svc
     namespace: monitoring
