@@ -52,3 +52,13 @@ argocd-update-admin-secret:
 grafana-initial-admin-secret:
     kubectl get secret kube-prometheus-stack-grafana -n monitoring -o jsonpath="{.data.admin-password}" 2>/dev/null | base64 -d && echo
 
+# Seal a plain Kubernetes Secret for use with sealed-secrets
+# Usage: just seal-secret path/to/secret.yaml > path/to/sealed-secret.yaml
+seal-secret file:
+    kubeseal --format yaml --controller-name sealed-secrets-controller --controller-namespace kube-system < {{file}}
+
+# Backup the sealed-secrets controller key (store this somewhere safe!)
+backup-sealed-secrets-key:
+    kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key-backup.yaml
+    @echo "Key written to sealed-secrets-key-backup.yaml — store this securely and do NOT commit it"
+
