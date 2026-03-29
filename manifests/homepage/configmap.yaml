@@ -38,6 +38,10 @@ data:
             href: https://docmost.lungfish-ide.ts.net
             description: Wiki and documentation
             icon: docmost.png
+        - IT-Tools:
+            href: https://it-tools.lungfish-ide.ts.net
+            description: Collection of handy online tools for developers
+            icon: it-tools.png
   widgets.yaml: |
     - search:
         provider: duckduckgo
