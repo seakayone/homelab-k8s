@@ -1,0 +1,21 @@
+- Homelab:
+    - ArgoCD:
+        href: https://argocd.lungfish-ide.ts.net
+        description: GitOps continuous delivery
+        icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/argo-cd.png
+    - Grafana:
+        href: https://grafana.lungfish-ide.ts.net
+        description: Metrics and dashboards
+        icon: grafana.png
+    - Mealie:
+        href: https://mealie.lungfish-ide.ts.net
+        description: Recipe manager
+        icon: mealie.png
+    - Docmost:
+        href: https://docmost.lungfish-ide.ts.net
+        description: Wiki and documentation
+        icon: docmost.png
+    - IT-Tools:
+        href: https://it-tools.lungfish-ide.ts.net
+        description: Collection of handy online tools for developers
+        icon: it-tools.png

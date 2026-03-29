@@ -1,0 +1,9 @@
+- search:
+    provider: duckduckgo
+    target: _blank
+- openmeteo:
+    label: Current
+    latitude: 36.66
+    longitude: -117.51
+    units: metric
+    cache: 5
