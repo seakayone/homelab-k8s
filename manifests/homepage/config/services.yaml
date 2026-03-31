@@ -15,3 +15,7 @@
         href: https://it-tools.lungfish-ide.ts.net
         description: Collection of handy online tools for developers
         icon: it-tools.png
+    - Vikunja:
+        href: https://vikunja.lungfish-ide.ts.net
+        description: Project and task management
+        icon: vikunja.png
