@@ -15,12 +15,19 @@ spec:
       labels:
         app: vikunja
     spec:
+      securityContext:
+        fsGroup: 1000
+        fsGroupChangePolicy: OnRootMismatch
       containers:
         - name: vikunja
           image: vikunja/vikunja:2.2.2
           ports:
             - containerPort: 3456
           env:
+            - name: HOME
+              value: /tmp
+            - name: XDG_CACHE_HOME
+              value: /tmp/.cache
             - name: VIKUNJA_SERVICE_PUBLICURL
               value: https://vikunja.lungfish-ide.ts.net
             - name: VIKUNJA_DATABASE_HOST
@@ -41,6 +48,9 @@ spec:
                 secretKeyRef:
                   name: vikunja-secrets
                   key: jwt-secret
+          securityContext:
+            runAsUser: 1000
+            runAsGroup: 1000
           volumeMounts:
             - name: files
               mountPath: /app/vikunja/files
@@ -92,6 +102,8 @@ spec:
           ports:
             - containerPort: 5432
           env:
+            - name: PGDATA
+              value: /var/lib/postgresql/data/pgdata
             - name: POSTGRES_DB
               value: vikunja
             - name: POSTGRES_USER
@@ -103,7 +115,7 @@ spec:
                   key: database-password
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql/data
+              mountPath: /var/lib/postgresql
           readinessProbe:
             exec:
               command:
