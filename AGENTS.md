@@ -96,7 +96,7 @@ manifests/
 - **Providers pinned**: `bpg/proxmox` v0.98.1, `siderolabs/talos` v0.10.1.
 - **Secrets**: All in `.envrc` via `TF_VAR_*` environment variables (direnv). Never commit `.envrc` or `*.tfvars`.
 - **Cluster endpoint**: Dynamically resolved from control plane IP (filters out loopback/link-local/pod CIDRs).
-- **ArgoCD syncs from**: `github.com/seakayone/homelab-k8s.git` using app-of-apps pattern (`apps/` → `manifests/`).
+- **ArgoCD syncs from**: `git.organa.one/christian/homelab-k8s.git` (via Tailscale egress service `gitea.argocd.svc.cluster.local`) using app-of-apps pattern (`apps/` → `manifests/`).
 - **ArgoCD UI**: `https://argocd.lungfish-ide.ts.net` via Tailscale Ingress.
 - **Grafana UI**: `https://grafana.lungfish-ide.ts.net` via Tailscale Ingress.
 - **Mealie UI**: `https://mealie.lungfish-ide.ts.net` via Tailscale Ingress.
