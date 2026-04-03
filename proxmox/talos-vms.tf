@@ -27,7 +27,7 @@ resource "proxmox_virtual_environment_vm" "talos_control_plane" {
   }
 
   memory {
-    dedicated = 4096
+    dedicated = 2048
   }
 
   disk {
@@ -78,7 +78,7 @@ resource "proxmox_virtual_environment_vm" "talos_worker" {
   }
 
   memory {
-    dedicated = 10240
+    dedicated = 8192
   }
 
   disk {
