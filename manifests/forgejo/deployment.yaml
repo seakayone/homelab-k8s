@@ -55,8 +55,10 @@ spec:
                   key: database-password
             - name: FORGEJO__server__ROOT_URL
               value: https://forgejo.lungfish-ide.ts.net
+            - name: FORGEJO__server__SSH_DOMAIN
+              value: forgejo-ssh.lungfish-ide.ts.net
             - name: FORGEJO__server__SSH_PORT
-              value: "2222"
+              value: "22"
             - name: FORGEJO__server__SSH_LISTEN_PORT
               value: "2222"
           securityContext:
