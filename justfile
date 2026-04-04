@@ -38,13 +38,6 @@ destroy-and-setup:
         echo "  Attempt $$i/30 - API not yet responsive, waiting 5s..."; \
         sleep 5; \
     done
-    just patch-coredns
-
-# Patch CoreDNS to resolve git.organa.one via LAN
-patch-coredns:
-    kubectl apply -f manifests/coredns-patch.yaml
-    kubectl rollout restart deployment coredns -n kube-system
-    kubectl rollout status deployment coredns -n kube-system --timeout=60s
 
 # Print the ArgoCD initial admin password
 argocd-initial-admin-secret:
