@@ -71,7 +71,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://forgejo.lungfish-ide.ts.net/christian/homelab-k8s.git
+    repoURL: https://forgejo.argocd.svc.cluster.local/christian/homelab-k8s.git
     targetRevision: main
     path: manifests/<app>
   destination:
@@ -304,7 +304,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://forgejo.lungfish-ide.ts.net/christian/homelab-k8s.git
+    repoURL: https://forgejo.argocd.svc.cluster.local/christian/homelab-k8s.git
     targetRevision: main
     path: manifests/it-tools
   destination:
