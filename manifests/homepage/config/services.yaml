@@ -23,3 +23,7 @@
         href: https://forgejo.lungfish-ide.ts.net
         description: Self-hosted Git forge
         icon: forgejo.png
+    - Proxmox:
+        href: https://pve.lungfish-ide.ts.net
+        description: Hypervisor management
+        icon: proxmox.png
