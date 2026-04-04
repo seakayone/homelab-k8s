@@ -19,3 +19,7 @@
         href: https://vikunja.lungfish-ide.ts.net
         description: Project and task management
         icon: vikunja.png
+    - Forgejo:
+        href: https://forgejo.lungfish-ide.ts.net
+        description: Self-hosted Git forge
+        icon: forgejo.png
