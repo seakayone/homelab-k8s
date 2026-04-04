@@ -30,7 +30,7 @@ spec:
                   --instance "$FORGEJO_URL" \
                   --token "$RUNNER_TOKEN" \
                   --name forgejo-runner \
-                  --labels docker:docker://node:22-bookworm,ubuntu-latest:docker://node:22-bookworm
+                  --labels docker:docker://node:22-bookworm,ubuntu-latest:docker://node:22-bookworm,docker-builder:docker://docker:27
               fi
               forgejo-runner daemon
           env:
