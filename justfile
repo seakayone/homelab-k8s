@@ -57,6 +57,10 @@ grafana-initial-admin-secret:
 seal-secret file:
     kubeseal --format yaml --controller-name sealed-secrets-controller --controller-namespace kube-system < {{file}}
 
+# Create the initial Miniflux admin user
+miniflux-create-admin:
+    kubectl exec -n miniflux $(kubectl get pod -n miniflux -l app=miniflux --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}') -- miniflux -create-admin
+
 # Sync the root ArgoCD app and wait for a specific app to become healthy
 # Usage: just argocd-sync-app <appname>
 argocd-sync-app app:
