@@ -57,6 +57,12 @@ grafana-initial-admin-secret:
 seal-secret file:
     kubeseal --format yaml --controller-name sealed-secrets-controller --controller-namespace kube-system < {{file}}
 
+# Sync the root ArgoCD app and wait for a specific app to become healthy
+# Usage: just argocd-sync-app <appname>
+argocd-sync-app app:
+    argocd app sync root --grpc-web
+    argocd app wait {{app}} --sync --health --grpc-web
+
 # Backup the sealed-secrets controller key (store this somewhere safe!)
 backup-sealed-secrets-key:
     kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key-backup.yaml
