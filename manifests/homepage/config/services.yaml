@@ -23,6 +23,10 @@
         href: https://forgejo.lungfish-ide.ts.net
         description: Self-hosted Git forge
         icon: forgejo.png
+    - Miniflux:
+        href: https://miniflux.lungfish-ide.ts.net
+        description: RSS feed reader
+        icon: miniflux.png
     - Proxmox:
         href: https://pve.lungfish-ide.ts.net:8006
         description: Hypervisor management
