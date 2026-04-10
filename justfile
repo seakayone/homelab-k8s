@@ -67,6 +67,17 @@ argocd-sync-app app:
     argocd app sync root --grpc-web
     argocd app wait {{app}} --sync --health --grpc-web
 
+# Manually trigger a backup job for an app (mealie, vikunja, miniflux, forgejo)
+backup-now app:
+    kubectl create job -n {{app}} --from=cronjob/{{app}}-backup {{app}}-backup-manual-$(date +%s)
+
+# List backup files stored for an app (mealie, vikunja, miniflux, forgejo)
+list-backups app:
+    #!/bin/bash
+    set -euo pipefail
+    kubectl run backup-browser --rm -i --restart=Never -n {{app}} --image=alpine:3.21 \
+        --overrides='{"spec":{"volumes":[{"name":"b","persistentVolumeClaim":{"claimName":"{{app}}-backup"}}],"containers":[{"name":"backup-browser","image":"alpine:3.21","command":["ls","-lh","/backup"],"volumeMounts":[{"name":"b","mountPath":"/backup"}]}]}}'
+
 # Backup the sealed-secrets controller key (store this somewhere safe!)
 backup-sealed-secrets-key:
     kubectl get secret -n kube-system -l sealedsecrets.bitnami.com/sealed-secrets-key -o yaml > sealed-secrets-key-backup.yaml

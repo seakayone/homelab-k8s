@@ -1,0 +1,106 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: backup
+  namespace: forgejo
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: backup
+  namespace: forgejo
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    resourceNames: ["forgejo-secrets"]
+    verbs: ["get"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: backup
+  namespace: forgejo
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: backup
+subjects:
+  - kind: ServiceAccount
+    name: backup
+    namespace: forgejo
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: forgejo-backup
+  namespace: forgejo
+spec:
+  schedule: "45 1 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 3600
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: backup
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: postgres:18
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+                  STAMP=$(date +%Y%m%d-%H%M%S)
+                  echo "Starting forgejo backup ${STAMP}..."
+
+                  pg_dump --host forgejo-postgres --username forgejo --dbname forgejo \
+                    | gzip > /backup/forgejo-db-${STAMP}.sql.gz
+                  echo "Database dump complete."
+                  find /backup -name "forgejo-db-*.sql.gz" -mtime +7 -delete
+
+                  tar czf /backup/forgejo-data-${STAMP}.tar.gz -C /data .
+                  echo "Data backup complete."
+                  find /backup -name "forgejo-data-*.tar.gz" -mtime +7 -delete
+
+                  tar czf /backup/forgejo-config-${STAMP}.tar.gz -C /config .
+                  echo "Config backup complete."
+                  find /backup -name "forgejo-config-*.tar.gz" -mtime +7 -delete
+
+                  echo "Retention cleanup complete."
+              env:
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: forgejo-secrets
+                      key: database-password
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+                  readOnly: true
+                - name: config
+                  mountPath: /config
+                  readOnly: true
+                - name: backup
+                  mountPath: /backup
+              resources:
+                requests:
+                  memory: 128Mi
+                  cpu: 50m
+                limits:
+                  memory: 512Mi
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: forgejo-data
+            - name: config
+              persistentVolumeClaim:
+                claimName: forgejo-config
+            - name: backup
+              persistentVolumeClaim:
+                claimName: forgejo-backup
