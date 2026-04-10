@@ -68,10 +68,6 @@ spec:
                   echo "Data backup complete."
                   find /backup -name "forgejo-data-*.tar.gz" -mtime +7 -delete
 
-                  tar czf /backup/forgejo-config-${STAMP}.tar.gz -C /config .
-                  echo "Config backup complete."
-                  find /backup -name "forgejo-config-*.tar.gz" -mtime +7 -delete
-
                   echo "Retention cleanup complete."
               env:
                 - name: PGPASSWORD
@@ -82,9 +78,6 @@ spec:
               volumeMounts:
                 - name: data
                   mountPath: /data
-                  readOnly: true
-                - name: config
-                  mountPath: /config
                   readOnly: true
                 - name: backup
                   mountPath: /backup
@@ -98,9 +91,6 @@ spec:
             - name: data
               persistentVolumeClaim:
                 claimName: forgejo-data
-            - name: config
-              persistentVolumeClaim:
-                claimName: forgejo-config
             - name: backup
               persistentVolumeClaim:
                 claimName: forgejo-backup
