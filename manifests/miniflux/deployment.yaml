@@ -30,7 +30,7 @@ spec:
             - until pg_isready -h miniflux-postgres -U miniflux -d miniflux; do sleep 2; done
       containers:
         - name: miniflux
-          image: miniflux/miniflux:2.2.5
+          image: miniflux/miniflux:2.2.19
           ports:
             - containerPort: 8080
           env:
