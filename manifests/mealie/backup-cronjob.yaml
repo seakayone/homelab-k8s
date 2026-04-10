@@ -16,9 +16,19 @@ spec:
       template:
         spec:
           restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 911
+            runAsGroup: 911
+            seccompProfile:
+              type: RuntimeDefault
           containers:
             - name: backup
               image: alpine:3.21
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
               command:
                 - /bin/sh
                 - -c
