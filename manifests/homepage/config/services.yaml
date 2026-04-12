@@ -27,6 +27,10 @@
         href: https://authentik.lungfish-ide.ts.net
         description: Identity provider and SSO
         icon: authentik.png
+    - Paperless:
+        href: https://paperless.lungfish-ide.ts.net
+        description: Document management system
+        icon: paperless-ngx.png
     - Proxmox:
         href: https://pve.lungfish-ide.ts.net:8006
         description: Hypervisor management
