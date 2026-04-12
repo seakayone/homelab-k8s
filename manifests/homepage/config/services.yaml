@@ -27,10 +27,6 @@
         href: https://authentik.lungfish-ide.ts.net
         description: Identity provider and SSO
         icon: authentik.png
-    - Vaultwarden:
-        href: https://vaultwarden.lungfish-ide.ts.net
-        description: Password manager
-        icon: vaultwarden.png
     - Proxmox:
         href: https://pve.lungfish-ide.ts.net:8006
         description: Hypervisor management
