@@ -140,6 +140,17 @@ spec:
         app: authentik-server
     spec:
       initContainers:
+        - name: fix-media-permissions
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /media
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: media
+              mountPath: /media
         - name: wait-for-postgres
           image: postgres:16-alpine
           env:
@@ -222,6 +233,17 @@ spec:
         app: authentik-worker
     spec:
       initContainers:
+        - name: fix-media-permissions
+          image: busybox:latest
+          command:
+            - sh
+            - -c
+            - chown -R 1000:1000 /media
+          securityContext:
+            runAsUser: 0
+          volumeMounts:
+            - name: media
+              mountPath: /media
         - name: wait-for-postgres
           image: postgres:16-alpine
           env:
