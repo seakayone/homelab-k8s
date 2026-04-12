@@ -189,6 +189,31 @@ spec:
                 secretKeyRef:
                   name: authentik-secrets
                   key: database-password
+            - name: AUTHENTIK_EMAIL__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-host
+            - name: AUTHENTIK_EMAIL__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-username
+            - name: AUTHENTIK_EMAIL__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-password
+            - name: AUTHENTIK_EMAIL__FROM
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-from
+            - name: AUTHENTIK_EMAIL__USE_TLS
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-use-tls
           volumeMounts:
             - name: media
               mountPath: /media
@@ -280,6 +305,31 @@ spec:
                 secretKeyRef:
                   name: authentik-secrets
                   key: database-password
+            - name: AUTHENTIK_EMAIL__HOST
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-host
+            - name: AUTHENTIK_EMAIL__USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-username
+            - name: AUTHENTIK_EMAIL__PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-password
+            - name: AUTHENTIK_EMAIL__FROM
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-from
+            - name: AUTHENTIK_EMAIL__USE_TLS
+              valueFrom:
+                secretKeyRef:
+                  name: authentik-secrets
+                  key: email-use-tls
           volumeMounts:
             - name: media
               mountPath: /media
