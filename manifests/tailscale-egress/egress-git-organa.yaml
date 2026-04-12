@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: egress-git-organa
+  namespace: tailscale
+  annotations:
+    # Tailscale IP of the Traefik host on organa.one tailnet
+    tailscale.com/tailnet-ip: "100.65.186.120"
+spec:
+  type: ExternalName
+  # The operator will update externalName to the in-cluster proxy Service it creates.
+  # Do not edit this field manually after initial apply.
+  externalName: placeholder
+  ports:
+    - name: https
+      port: 443
+      protocol: TCP
