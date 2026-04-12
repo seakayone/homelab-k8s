@@ -15,20 +15,26 @@ locals {
     .:53 {
         errors
         health {
-           lameduck 5s
+            lameduck 5s
         }
         ready
-        rewrite name git.organa.one egress-git-organa.tailscale.svc.cluster.local
-        kubernetes cluster.local in-addr.arpa ip6.arpa {
-           pods insecure
-           fallthrough in-addr.arpa ip6.arpa
-           ttl 30
+        log . {
+            class error
         }
         prometheus :9153
+        rewrite name git.organa.one egress-git-organa.tailscale.svc.cluster.local
+        kubernetes cluster.local in-addr.arpa ip6.arpa {
+            pods insecure
+            fallthrough in-addr.arpa ip6.arpa
+            ttl 30
+        }
         forward . /etc/resolv.conf {
            max_concurrent 1000
         }
-        cache 30
+        cache 30 {
+           disable success cluster.local
+           disable denial cluster.local
+        }
         loop
         reload
         loadbalance
