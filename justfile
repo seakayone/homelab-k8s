@@ -67,11 +67,11 @@ argocd-sync-app app:
     argocd app sync root --grpc-web
     argocd app wait {{app}} --sync --health --grpc-web
 
-# Manually trigger a backup job for an app (mealie, vikunja, miniflux, forgejo)
+# Manually trigger a backup job for an app (mealie, vikunja, miniflux)
 backup-now app:
     kubectl create job -n {{app}} --from=cronjob/{{app}}-backup {{app}}-backup-manual-$(date +%s)
 
-# List backup files stored for an app (mealie, vikunja, miniflux, forgejo)
+# List backup files stored for an app (mealie, vikunja, miniflux)
 list-backups app:
     #!/bin/bash
     set -euo pipefail
