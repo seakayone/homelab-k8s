@@ -20,6 +20,10 @@ just destroy-and-setup  # Full teardown + rebuild pipeline
 just argocd-initial-admin-secret   # Print ArgoCD initial admin password
 just argocd-update-admin-secret    # Log in and update ArgoCD admin password
 just grafana-initial-admin-secret  # Print Grafana initial admin password
+just argocd-sync-app <app>         # Sync root app and wait for <app> to be healthy
+just backup-now <app>              # Manually trigger a backup job (mealie, vikunja, miniflux, authentik)
+just list-backups <app>            # List backup files for an app
+just miniflux-create-admin         # Create the initial Miniflux admin user
 ```
 
 Format and validate:
@@ -48,6 +52,7 @@ Root module (main.tf)
         ├── talos-vms.tf    — Talos VMs (controlplane + worker nodes)
         ├── talos.tf        — Talos secrets, machine configs, bootstrap, health check, kubeconfig
         ├── nfs.tf          — Debian NFS server VM (VM ID 2000, IP 192.168.178.200)
+        ├── variables.tf    — Input variables
         ├── outputs.tf      — Module outputs
         └── main.tf         — proxmox + talos provider config
 
@@ -69,14 +74,37 @@ apps/                                            — ArgoCD Application definiti
   │     └── application.yaml               — Grafana Alloy DaemonSet (pod log collection → Loki)
   ├── mealie/
   │     └── application.yaml               — Mealie recipe manager from manifests/mealie/
+  ├── miniflux/
+  │     └── application.yaml               — Miniflux RSS reader from manifests/miniflux/
+  ├── vikunja/
+  │     └── application.yaml               — Vikunja task manager from manifests/vikunja/
+  ├── authentik/
+  │     └── application.yaml               — Authentik identity provider from manifests/authentik/
+  ├── homepage/
+  │     └── application.yaml               — Homepage dashboard from manifests/homepage/
+  ├── it-tools/
+  │     └── application.yaml               — IT-Tools utilities from manifests/it-tools/
   ├── sealed-secrets/
   │     └── application.yaml               — Sealed-secrets controller (Bitnami Helm chart v2.18.4)
-  └── nfs-csi/
-        └── application.yaml               — NFS CSI driver (default StorageClass "nfs")
+  ├── nfs-csi/
+  │     └── application.yaml               — NFS CSI driver (default StorageClass "nfs")
+  └── nfs-nas/
+        └── application.yaml               — NFS backup StorageClass "nfs-backup" (NAS-backed)
 
 manifests/
-  ├── argocd/install.yaml                  — Full ArgoCD installation (do not hand-edit)
-  ├── mealie/                              — Deployment, Service, PVC, Tailscale Ingress
+  ├── argocd/
+  │     ├── install.yaml                   — Full ArgoCD installation (do not hand-edit)
+  │     ├── apply.sh                       — Script to apply ArgoCD manifests
+  │     ├── repositories.yaml              — ArgoCD repository configuration
+  │     └── gitorgana-repo-sealed-secret.yaml — Sealed secret for repo credentials
+  ├── mealie/                              — Deployment, Service, PVC, Tailscale Ingress, backup CronJob
+  ├── miniflux/                            — Deployment, Service, PVC, Tailscale Ingress, backup CronJob, SealedSecret
+  ├── vikunja/                             — Deployment, Service, PVC, Tailscale Ingress, backup CronJob, SealedSecret
+  ├── authentik/                           — Deployment, Service, PVC, Tailscale Ingress, backup CronJob, SealedSecret
+  ├── homepage/                            — Deployment, Service, Tailscale Ingress, RBAC, Kustomize, config/
+  ├── it-tools/                            — Deployment, Service, Tailscale Ingress
+  ├── nfs-nas/
+  │     └── storageclass.yaml              — StorageClass "nfs-backup" (NAS at 192.168.178.39:/volume1/k8s-backup)
   ├── monitoring/
   │     └── dashboards-configmap.yaml      — Grafana dashboard ConfigMaps
   └── tailscale-operator/
@@ -100,8 +128,14 @@ manifests/
 - **ArgoCD UI**: `https://argocd.lungfish-ide.ts.net` via Tailscale Ingress.
 - **Grafana UI**: `https://grafana.lungfish-ide.ts.net` via Tailscale Ingress.
 - **Mealie UI**: `https://mealie.lungfish-ide.ts.net` via Tailscale Ingress.
+- **Miniflux UI**: `https://miniflux.lungfish-ide.ts.net` via Tailscale Ingress.
+- **Vikunja UI**: `https://vikunja.lungfish-ide.ts.net` via Tailscale Ingress.
+- **Authentik UI**: `https://authentik.lungfish-ide.ts.net` via Tailscale Ingress.
+- **Homepage UI**: `https://hp.lungfish-ide.ts.net` via Tailscale Ingress.
+- **IT-Tools UI**: `https://it-tools.lungfish-ide.ts.net` via Tailscale Ingress.
 - **Tailscale operator**: Deployed via Kustomize with API server proxy mode.
-- **NFS storage**: Default StorageClass `nfs` backed by NFS server at 192.168.178.200:/export/k8s. Used by Loki (3Gi), Prometheus (5Gi), Grafana (2Gi), Mealie PVC.
+- **NFS storage**: Default StorageClass `nfs` backed by NFS server VM at 192.168.178.200:/export/k8s. Used by Loki (3Gi), Prometheus (5Gi), Grafana (2Gi), Mealie PVC, and other app PVCs.
+- **NFS backup storage**: StorageClass `nfs-backup` backed by NAS at 192.168.178.39:/volume1/k8s-backup. Used by backup CronJobs for Mealie, Miniflux, Vikunja, and Authentik.
 - **Observability stack**: kube-prometheus-stack (Prometheus + Grafana + Alertmanager) + Loki + Grafana Alloy for log collection.
 - **Sealed Secrets**: Bitnami sealed-secrets controller in `kube-system` namespace. Allows encrypting Kubernetes Secrets so they can be safely committed to Git. ArgoCD-managed via Helm chart.
 - Terraform state is local (not remote). `destroy.sh` wipes state files directly.
