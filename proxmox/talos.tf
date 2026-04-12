@@ -31,7 +31,6 @@ resource "talos_machine_configuration_apply" "controlplane" {
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.controlplane.machine_configuration
   node                        = local.cp_ip
-  config_patches              = [local.coredns_patch]
 }
 
 resource "talos_machine_configuration_apply" "worker" {
