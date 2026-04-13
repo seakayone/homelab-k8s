@@ -1,20 +1,61 @@
 apiVersion: argoproj.io/v1alpha1
-kind: Application
+kind: ApplicationSet
 metadata:
   name: root
   namespace: argocd
 spec:
-  project: default
-  source:
-    repoURL: https://github.com/seakayone/homelab-k8s.git
-    targetRevision: main
-    path: apps
-    directory:
-      recurse: true
-  destination:
-    server: https://kubernetes.default.svc
-    namespace: argocd
-  syncPolicy:
-    automated:
-      prune: true
-      selfHeal: true
+  goTemplate: true
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements:
+                - app: argocd
+                  path: apps/argocd
+                - app: authentik
+                  path: apps/authentik
+                - app: mealie
+                  path: apps/mealie
+                - app: miniflux
+                  path: apps/miniflux
+                - app: monitoring
+                  path: apps/monitoring
+                - app: loki
+                  path: apps/loki
+                - app: alloy
+                  path: apps/alloy
+                - app: sealed-secrets
+                  path: apps/sealed-secrets
+                - app: vikunja
+                  path: apps/vikunja
+                - app: it-tools
+                  path: apps/it-tools
+                - app: homepage
+                  path: apps/homepage
+                - app: nfs-csi
+                  path: apps/nfs-csi
+                - app: nfs-nas
+                  path: apps/nfs-nas
+                - app: paperless
+                  path: apps/paperless
+  template:
+    metadata:
+      name: "{{.app}}"
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+    spec:
+      project: default
+      source:
+        repoURL: https://github.com/seakayone/homelab-k8s.git
+        targetRevision: main
+        path: "{{.path}}"
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{.app}}"
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+          - CreateNamespace=true
