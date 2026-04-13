@@ -6,38 +6,36 @@ metadata:
 spec:
   goTemplate: true
   generators:
-    - matrix:
-        generators:
-          - list:
-              elements:
-                - app: argocd
-                  path: apps/argocd
+    - list:
+        elements:
+          - app: argocd
+                  path: manifests/argocd
                 - app: authentik
-                  path: apps/authentik
+                  path: manifests/authentik
                 - app: mealie
-                  path: apps/mealie
+                  path: manifests/mealie
                 - app: miniflux
-                  path: apps/miniflux
+                  path: manifests/miniflux
                 - app: monitoring
-                  path: apps/monitoring
+                  path: manifests/monitoring
                 - app: loki
-                  path: apps/loki
+                  path: manifests/loki
                 - app: alloy
-                  path: apps/alloy
+                  path: manifests/alloy
                 - app: sealed-secrets
-                  path: apps/sealed-secrets
+                  path: manifests/sealed-secrets
                 - app: vikunja
-                  path: apps/vikunja
+                  path: manifests/vikunja
                 - app: it-tools
-                  path: apps/it-tools
+                  path: manifests/it-tools
                 - app: homepage
-                  path: apps/homepage
+                  path: manifests/homepage
                 - app: nfs-csi
-                  path: apps/nfs-csi
+                  path: manifests/nfs-csi
                 - app: nfs-nas
-                  path: apps/nfs-nas
+                  path: manifests/nfs-nas
                 - app: paperless
-                  path: apps/paperless
+                  path: manifests/paperless
   template:
     metadata:
       name: "{{.app}}"
