@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mealie
-          image: ghcr.io/mealie-recipes/mealie:v3.14.0
+          image: ghcr.io/mealie-recipes/mealie:v3.15.1
           ports:
             - containerPort: 9000
           env:
@@ -32,7 +32,7 @@ spec:
             - name: OIDC_SIGNUP_ENABLED
               value: "true"
             - name: OIDC_CONFIGURATION_URL
-              value: https://authentik.lungfish-ide.ts.net/application/o/mealie/.well-known/openid-configuration
+              value: http://authentik.authentik.svc.cluster.local/application/o/mealie/.well-known/openid-configuration
             - name: OIDC_CLIENT_ID
               valueFrom:
                 secretKeyRef:
