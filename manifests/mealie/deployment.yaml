@@ -32,7 +32,7 @@ spec:
             - name: OIDC_SIGNUP_ENABLED
               value: "true"
             - name: OIDC_CONFIGURATION_URL
-              value: http://authentik.authentik.svc.cluster.local/application/o/mealie/.well-known/openid-configuration
+              value: http://authentik.authentik.svc.cluster.local:9000/application/o/mealie/.well-known/openid-configuration
             - name: OIDC_CLIENT_ID
               valueFrom:
                 secretKeyRef:
