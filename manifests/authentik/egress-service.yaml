@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: authentik-egress
+  namespace: authentik
+  annotations:
+    tailscale.com/tailnet-fqdn: "authentik.lungfish-ide.ts.net"
+spec:
+  type: ExternalName
+  externalName: placeholder
