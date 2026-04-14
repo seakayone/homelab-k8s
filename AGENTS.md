@@ -190,3 +190,7 @@ kubectl delete pod -n kube-system -l app.kubernetes.io/name=sealed-secrets-contr
 - **CLI tool**: `kubeseal` (version managed by `.mise.toml`)
 - **Key backup file**: `sealed-secrets-key-backup.yaml` (gitignored)
 - Secrets are scoped to a specific name + namespace by default (cannot be reused elsewhere)
+
+### Dont's
+
+Do not `kubectl apply` for any apps managed by ArgoCD. The applied changes will be overwritten by ArgoCD immediately.
