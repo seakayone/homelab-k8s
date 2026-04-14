@@ -22,11 +22,35 @@ spec:
             - containerPort: 9000
           env:
             - name: ALLOW_SIGNUP
-              value: "true"
+              value: "false"
             - name: TZ
               value: Europe/Zurich
             - name: BASE_URL
-              value: https://mealie.organa.one
+              value: https://mealie.lungfish-ide.ts.net
+            - name: OIDC_AUTH_ENABLED
+              value: "true"
+            - name: OIDC_SIGNUP_ENABLED
+              value: "true"
+            - name: OIDC_CONFIGURATION_URL
+              value: https://authentik.lungfish-ide.ts.net/application/o/mealie/.well-known/openid-configuration
+            - name: OIDC_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: mealie-secrets
+                  key: oidc-client-id
+            - name: OIDC_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: mealie-secrets
+                  key: oidc-client-secret
+            - name: OIDC_AUTO_REDIRECT
+              value: "true"
+            - name: OIDC_PROVIDER_NAME
+              value: "authentik"
+            - name: OIDC_USER_CLAIM
+              value: "email"
+            - name: OIDC_GROUPS_CLAIM
+              value: "groups"
           volumeMounts:
             - name: data
               mountPath: /app/data
