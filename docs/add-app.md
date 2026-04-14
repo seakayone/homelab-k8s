@@ -87,53 +87,20 @@ spec:
 
 The root app (`apps/root.yaml`) recurses the entire `apps/` directory, so ArgoCD picks this up automatically on the next sync — no other registration needed.
 
----
-
 ## 3. Sealed Secrets
 
 If the app needs credentials (passwords, API keys, tokens), use Sealed Secrets so the encrypted values can be committed safely to Git.
 
-**Step 1 — Write a plain Secret to a temp location (never inside the repo):**
+Refer to the [Sealed Secrets Guide](sealed-secrets.md) for detailed instructions on:
+- Creating and sealing secrets.
+- Referencing secrets in deployments.
+- Backing up and restoring the controller's encryption key.
 
-```yaml
-# /tmp/<app>-secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: <app>-secrets
-  namespace: <app>
-type: Opaque
-stringData:
-  MY_PASSWORD: "a-strong-random-value"
-  API_KEY: "another-secret"
-```
-
-**Step 2 — Seal it:**
-
-```bash
-just seal-secret /tmp/<app>-secret.yaml > manifests/<app>/sealed-secret.yaml
-```
-
-**Step 3 — Delete the plain file:**
-
-```bash
-rm /tmp/<app>-secret.yaml
-```
-
-**Step 4 — Commit `sealed-secret.yaml`.** The in-cluster controller decrypts it into a regular `Secret` with the same `name` and `namespace`.
-
-Reference the secret from the deployment:
-
-```yaml
-env:
-  - name: MY_PASSWORD
-    valueFrom:
-      secretKeyRef:
-        name: <app>-secrets
-        key: MY_PASSWORD
-```
-
-> Sealed Secrets are scoped to a specific name + namespace. A secret sealed for `<app>/<app>-secrets` cannot be used elsewhere. If the controller key is ever lost, restore it first with `just backup-sealed-secrets-key` before deploying the controller on a new cluster.
+Briefly:
+1. Write a plain Secret to a temporary file (outside the repo).
+2. Seal it using `just seal-secret /tmp/secret.yaml > manifests/<app>/sealed-secret.yaml`.
+3. Delete the temporary file.
+4. Reference the Secret in your deployment.
 
 ---
 
