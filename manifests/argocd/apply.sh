@@ -14,4 +14,4 @@ kubectl apply "$@" --server-side --force-conflicts -n argocd -f "$SCRIPT_DIR/ins
 echo "Waiting for argocd-server deployment to exist..."
 until kubectl -n argocd get deployment/argocd-server &>/dev/null; do sleep 2; done
 kubectl -n argocd wait --for=condition=available deployment/argocd-server --timeout=300s
-kubectl apply "$@" -f "$REPO_ROOT/apps/root.yaml"
+kubectl apply "$@" -R -f "$REPO_ROOT/apps/"

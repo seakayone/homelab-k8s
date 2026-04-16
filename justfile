@@ -43,6 +43,10 @@ destroy-and-setup:
 argocd-initial-admin-secret:
     kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath="{.data.password}" 2>/dev/null | base64 -d && echo
 
+# Log in to ArgoCD interactively (prompts for username and password)
+argocd-login:
+    argocd login ${ARGOCD_SERVER} --grpc-web
+
 # Log in to ArgoCD and update the admin password
 argocd-update-admin-secret:
    argocd login ${ARGOCD_SERVER} --username admin --grpc-web
@@ -56,12 +60,6 @@ grafana-initial-admin-secret:
 # Usage: just seal-secret path/to/secret.yaml > path/to/sealed-secret.yaml
 seal-secret file:
     kubeseal --format yaml --controller-name sealed-secrets-controller --controller-namespace kube-system < {{file}}
-
-# Sync the root ArgoCD app and wait for a specific app to become healthy
-# Usage: just argocd-sync-app <appname>
-argocd-sync-app app:
-    argocd app sync root --grpc-web
-    argocd app wait {{app}} --sync --health --grpc-web
 
 # Manually trigger a backup job for an app (mealie, vikunja)
 backup-now app:

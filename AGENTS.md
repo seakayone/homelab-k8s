@@ -20,7 +20,6 @@ just destroy-and-setup  # Full teardown + rebuild pipeline
 just argocd-initial-admin-secret   # Print ArgoCD initial admin password
 just argocd-update-admin-secret    # Log in and update ArgoCD admin password
 just grafana-initial-admin-secret  # Print Grafana initial admin password
-just argocd-sync-app <app>         # Sync root app and wait for <app> to be healthy
 just backup-now <app>              # Manually trigger a backup job (mealie, vikunja, authentik)
 just list-backups <app>            # List backup files for an app
 ```

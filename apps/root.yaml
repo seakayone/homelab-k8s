@@ -9,31 +9,19 @@ spec:
     - list:
         elements:
           - app: argocd
-                  path: manifests/argocd
-                - app: authentik
-                  path: manifests/authentik
-                - app: mealie
-                  path: manifests/mealie
-                - app: monitoring
-                  path: manifests/monitoring
-                - app: loki
-                  path: manifests/loki
-                - app: alloy
-                  path: manifests/alloy
-                - app: sealed-secrets
-                  path: manifests/sealed-secrets
-                - app: vikunja
-                  path: manifests/vikunja
-                - app: it-tools
-                  path: manifests/it-tools
-                - app: homepage
-                  path: manifests/homepage
-                - app: nfs-csi
-                  path: manifests/nfs-csi
-                - app: nfs-nas
-                  path: manifests/nfs-nas
-                - app: paperless
-                  path: manifests/paperless
+            path: manifests/argocd
+          - app: authentik
+            path: manifests/authentik
+          - app: mealie
+            path: manifests/mealie
+          - app: vikunja
+            path: manifests/vikunja
+          - app: it-tools
+            path: manifests/it-tools
+          - app: homepage
+            path: manifests/homepage
+          - app: paperless
+            path: manifests/paperless
   template:
     metadata:
       name: "{{.app}}"
