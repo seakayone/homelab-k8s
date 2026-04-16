@@ -17,14 +17,14 @@ hideVersion: true
 target: _blank
 
 layout:
-  Infrastructure:
-    style: row
-    columns: 2
-    icon: mdi-server-network-#64748b
   Productivity:
     style: row
     columns: 2
     icon: mdi-briefcase-#64748b
+  Infrastructure:
+    style: row
+    columns: 2
+    icon: mdi-server-network-#64748b
   Tools:
     style: row
     columns: 2

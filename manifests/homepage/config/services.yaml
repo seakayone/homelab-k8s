@@ -1,3 +1,26 @@
+- Productivity:
+    - Mealie:
+        href: https://mealie.lungfish-ide.ts.net
+        description: Recipe manager
+        icon: mealie.png
+        namespace: mealie
+        app: mealie
+        podSelector: app=mealie
+    - Vikunja:
+        href: https://vikunja.lungfish-ide.ts.net
+        description: Project and task management
+        icon: vikunja.png
+        namespace: vikunja
+        app: vikunja
+        podSelector: app=vikunja
+    - Paperless:
+        href: https://paperless.lungfish-ide.ts.net
+        description: Document management system
+        icon: paperless-ngx.png
+        namespace: paperless
+        app: paperless
+        podSelector: app=paperless
+
 - Infrastructure:
     - ArgoCD:
         href: https://argocd.lungfish-ide.ts.net
@@ -22,29 +45,6 @@
         icon: grafana.png
         namespace: monitoring
         app: grafana
-
-- Productivity:
-    - Mealie:
-        href: https://mealie.lungfish-ide.ts.net
-        description: Recipe manager
-        icon: mealie.png
-        namespace: mealie
-        app: mealie
-        podSelector: app=mealie
-    - Vikunja:
-        href: https://vikunja.lungfish-ide.ts.net
-        description: Project and task management
-        icon: vikunja.png
-        namespace: vikunja
-        app: vikunja
-        podSelector: app=vikunja
-    - Paperless:
-        href: https://paperless.lungfish-ide.ts.net
-        description: Document management system
-        icon: paperless-ngx.png
-        namespace: paperless
-        app: paperless
-        podSelector: app=paperless
 
 - Tools:
     - IT-Tools:
