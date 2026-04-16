@@ -11,15 +11,6 @@
       memory: true
       showLabel: true
 
-- datetime:
-    text_size: md
-    locale: de-CH
-    format:
-      timeZone: Europe/Zurich
-      hourCycle: h23
-      dateStyle: short
-      timeStyle: short
-
 - search:
     provider: custom
     name: Ecosia
