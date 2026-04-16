@@ -84,6 +84,8 @@ spec:
               value: "true"
             - name: PAPERLESS_APPS
               value: allauth.socialaccount.providers.openid_connect
+            - name: PAPERLESS_REDIRECT_LOGIN_TO_SSO
+              value: "true"
             - name: PAPERLESS_SOCIALACCOUNT_PROVIDERS
               valueFrom:
                 secretKeyRef:
