@@ -57,21 +57,17 @@ grafana-initial-admin-secret:
 seal-secret file:
     kubeseal --format yaml --controller-name sealed-secrets-controller --controller-namespace kube-system < {{file}}
 
-# Create the initial Miniflux admin user
-miniflux-create-admin:
-    kubectl exec -n miniflux $(kubectl get pod -n miniflux -l app=miniflux --field-selector=status.phase=Running -o jsonpath='{.items[0].metadata.name}') -- miniflux -create-admin
-
 # Sync the root ArgoCD app and wait for a specific app to become healthy
 # Usage: just argocd-sync-app <appname>
 argocd-sync-app app:
     argocd app sync root --grpc-web
     argocd app wait {{app}} --sync --health --grpc-web
 
-# Manually trigger a backup job for an app (mealie, vikunja, miniflux)
+# Manually trigger a backup job for an app (mealie, vikunja)
 backup-now app:
     kubectl create job -n {{app}} --from=cronjob/{{app}}-backup {{app}}-backup-manual-$(date +%s)
 
-# List backup files stored for an app (mealie, vikunja, miniflux)
+# List backup files stored for an app (mealie, vikunja)
 list-backups app:
     #!/bin/bash
     set -euo pipefail

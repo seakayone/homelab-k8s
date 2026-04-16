@@ -14,8 +14,6 @@ spec:
                   path: manifests/authentik
                 - app: mealie
                   path: manifests/mealie
-                - app: miniflux
-                  path: manifests/miniflux
                 - app: monitoring
                   path: manifests/monitoring
                 - app: loki

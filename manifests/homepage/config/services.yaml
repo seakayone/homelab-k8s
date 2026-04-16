@@ -19,10 +19,6 @@
         href: https://vikunja.lungfish-ide.ts.net
         description: Project and task management
         icon: vikunja.png
-    - Miniflux:
-        href: https://miniflux.lungfish-ide.ts.net
-        description: RSS feed reader
-        icon: miniflux.png
     - Authentik:
         href: https://authentik.lungfish-ide.ts.net
         description: Identity provider and SSO
