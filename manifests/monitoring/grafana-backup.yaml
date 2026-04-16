@@ -1,0 +1,101 @@
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: grafana-backup
+  namespace: monitoring
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: grafana-backup
+  namespace: monitoring
+rules:
+  - apiGroups: [""]
+    resources: ["pods"]
+    verbs: ["get", "list"]
+  - apiGroups: [""]
+    resources: ["pods/exec"]
+    verbs: ["create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: grafana-backup
+  namespace: monitoring
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: grafana-backup
+subjects:
+  - kind: ServiceAccount
+    name: grafana-backup
+    namespace: monitoring
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: grafana-backup
+  namespace: monitoring
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: nfs-backup
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: grafana-backup
+  namespace: monitoring
+spec:
+  schedule: "0 2 * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: 1800
+      backoffLimit: 2
+      template:
+        spec:
+          serviceAccountName: grafana-backup
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: bitnami/kubectl:1.35
+              command:
+                - /bin/bash
+                - -c
+                - |
+                  set -euo pipefail
+                  STAMP=$(date +%Y%m%d-%H%M%S)
+                  echo "Starting grafana backup ${STAMP}..."
+
+                  POD=$(kubectl -n monitoring get pod -l app.kubernetes.io/name=grafana \
+                    --field-selector=status.phase=Running \
+                    -o jsonpath='{.items[0].metadata.name}')
+                  echo "Backing up from pod: ${POD}"
+
+                  kubectl -n monitoring exec "${POD}" -c grafana -- \
+                    tar czf - -C /var/lib/grafana . \
+                    > /backup/grafana-${STAMP}.tar.gz
+                  echo "Snapshot size: $(stat -c%s /backup/grafana-${STAMP}.tar.gz) bytes"
+
+                  find /backup -name "grafana-*.tar.gz" -mtime +7 -delete
+                  echo "Retention cleanup complete."
+              volumeMounts:
+                - name: backup
+                  mountPath: /backup
+              resources:
+                requests:
+                  memory: 64Mi
+                  cpu: 50m
+                limits:
+                  memory: 256Mi
+          volumes:
+            - name: backup
+              persistentVolumeClaim:
+                claimName: grafana-backup
