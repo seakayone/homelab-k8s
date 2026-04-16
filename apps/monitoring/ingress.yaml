@@ -5,6 +5,13 @@ metadata:
   namespace: monitoring
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Grafana
+    gethomepage.dev/description: Metrics and dashboards
+    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/icon: grafana.png
+    gethomepage.dev/href: https://grafana.lungfish-ide.ts.net
+    gethomepage.dev/app: grafana
 spec:
   ingressClassName: tailscale
   tls:

@@ -1,3 +1,11 @@
+- datetime:
+    text_size: xl
+    format:
+      timeZone: Europe/Zurich
+      hourCycle: h23
+      dateStyle: short
+      timeStyle: short
+
 - kubernetes:
     cluster:
       show: true

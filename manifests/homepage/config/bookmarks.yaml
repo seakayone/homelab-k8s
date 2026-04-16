@@ -1,0 +1,21 @@
+- Homelab:
+    - Repository:
+        - abbr: GH
+          href: https://github.com/seakayone/homelab-k8s
+    - Tailscale:
+        - abbr: TS
+          href: https://login.tailscale.com/admin/machines
+
+- Docs:
+    - Talos:
+        - abbr: TL
+          href: https://www.talos.dev/latest/
+    - ArgoCD:
+        - abbr: AR
+          href: https://argo-cd.readthedocs.io/
+    - Kubernetes:
+        - abbr: K8
+          href: https://kubernetes.io/docs/home/
+    - Homepage:
+        - abbr: HP
+          href: https://gethomepage.dev/

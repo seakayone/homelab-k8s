@@ -5,6 +5,13 @@ metadata:
   namespace: argocd
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: ArgoCD
+    gethomepage.dev/description: GitOps continuous delivery
+    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/argo-cd.png
+    gethomepage.dev/href: https://argocd.lungfish-ide.ts.net
+    gethomepage.dev/app: argocd-server
 spec:
   ingressClassName: tailscale
   rules:

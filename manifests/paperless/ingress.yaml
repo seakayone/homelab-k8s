@@ -5,6 +5,14 @@ metadata:
   namespace: paperless
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Paperless
+    gethomepage.dev/description: Document management system
+    gethomepage.dev/group: Productivity
+    gethomepage.dev/icon: paperless-ngx.png
+    gethomepage.dev/href: https://paperless.lungfish-ide.ts.net
+    gethomepage.dev/app: paperless
+    gethomepage.dev/pod-selector: app=paperless
 spec:
   ingressClassName: tailscale
   rules:

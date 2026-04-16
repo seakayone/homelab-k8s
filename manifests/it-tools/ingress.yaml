@@ -5,6 +5,14 @@ metadata:
   namespace: it-tools
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: IT-Tools
+    gethomepage.dev/description: Collection of handy online tools for developers
+    gethomepage.dev/group: Productivity
+    gethomepage.dev/icon: it-tools.png
+    gethomepage.dev/href: https://it-tools.lungfish-ide.ts.net
+    gethomepage.dev/app: it-tools
+    gethomepage.dev/pod-selector: app=it-tools
 spec:
   ingressClassName: tailscale
   rules:

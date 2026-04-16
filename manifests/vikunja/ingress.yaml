@@ -5,6 +5,14 @@ metadata:
   namespace: vikunja
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Vikunja
+    gethomepage.dev/description: Project and task management
+    gethomepage.dev/group: Productivity
+    gethomepage.dev/icon: vikunja.png
+    gethomepage.dev/href: https://vikunja.lungfish-ide.ts.net
+    gethomepage.dev/app: vikunja
+    gethomepage.dev/pod-selector: app=vikunja
 spec:
   ingressClassName: tailscale
   rules:

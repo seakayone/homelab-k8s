@@ -5,6 +5,14 @@ metadata:
   namespace: mealie
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Mealie
+    gethomepage.dev/description: Recipe manager
+    gethomepage.dev/group: Productivity
+    gethomepage.dev/icon: mealie.png
+    gethomepage.dev/href: https://mealie.lungfish-ide.ts.net
+    gethomepage.dev/app: mealie
+    gethomepage.dev/pod-selector: app=mealie
 spec:
   ingressClassName: tailscale
   rules:

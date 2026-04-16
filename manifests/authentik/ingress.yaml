@@ -5,6 +5,14 @@ metadata:
   namespace: authentik
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: Authentik
+    gethomepage.dev/description: Identity provider and SSO
+    gethomepage.dev/group: Infrastructure
+    gethomepage.dev/icon: authentik.png
+    gethomepage.dev/href: https://authentik.lungfish-ide.ts.net
+    gethomepage.dev/app: authentik-server
+    gethomepage.dev/pod-selector: app=authentik-server
 spec:
   ingressClassName: tailscale
   rules:
