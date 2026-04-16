@@ -16,8 +16,9 @@
     target: _blank
 
 - openmeteo:
-    label: Current
-    latitude: 36.66
-    longitude: -117.51
+    label: Basel
+    latitude: 47.5596
+    longitude: 7.5886
+    timezone: Europe/Zurich
     units: metric
     cache: 5
