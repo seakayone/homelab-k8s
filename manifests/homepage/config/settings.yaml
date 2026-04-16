@@ -2,7 +2,7 @@ title: Homelab
 favicon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/kubernetes.png
 
 background:
-  image: https://images.unsplash.com/photo-1672288072591-619afe830096?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1920&q=80
+  image: https://images.unsplash.com/photo-1502790671504-542ad42d5189?auto=format&fit=crop&w=2560&q=80
   blur: sm
   saturate: 50
   brightness: 50
