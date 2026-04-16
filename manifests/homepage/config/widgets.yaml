@@ -1,11 +1,3 @@
-- datetime:
-    text_size: xl
-    format:
-      timeZone: Europe/Zurich
-      hourCycle: h23
-      dateStyle: short
-      timeStyle: short
-
 - kubernetes:
     cluster:
       show: true
@@ -34,3 +26,12 @@
     timezone: Europe/Zurich
     units: metric
     cache: 5
+
+- datetime:
+    text_size: xl
+    locale: de-CH
+    format:
+      timeZone: Europe/Zurich
+      hourCycle: h23
+      dateStyle: short
+      timeStyle: short
