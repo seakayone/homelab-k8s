@@ -12,7 +12,10 @@
       showLabel: true
 
 - search:
-    provider: duckduckgo
+    provider: custom
+    name: Ecosia
+    url: https://www.ecosia.org/search?q=
+    suggestionUrl: https://ac.ecosia.org/autocomplete?q=&type=list
     target: _blank
 
 - openmeteo:
