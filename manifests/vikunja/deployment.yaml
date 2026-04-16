@@ -69,6 +69,9 @@ spec:
               mountPath: /app/vikunja/files
             - name: tmp
               mountPath: /tmp
+            - name: config
+              mountPath: /etc/vikunja
+              readOnly: true
           readinessProbe:
             tcpSocket:
               port: 3456
@@ -91,6 +94,9 @@ spec:
             claimName: vikunja-files
         - name: tmp
           emptyDir: {}
+        - name: config
+          secret:
+            secretName: vikunja-oidc-config
 ---
 apiVersion: apps/v1
 kind: Deployment
