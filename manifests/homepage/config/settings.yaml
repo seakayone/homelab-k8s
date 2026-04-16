@@ -25,7 +25,3 @@ layout:
     style: row
     columns: 2
     icon: mdi-server-network-#64748b
-  Tools:
-    style: row
-    columns: 2
-    icon: mdi-tools-#64748b
