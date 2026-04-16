@@ -168,7 +168,7 @@ spec:
                   key: database-password
           volumeMounts:
             - name: data
-              mountPath: /var/lib/postgresql
+              mountPath: /var/lib/postgresql/data
           readinessProbe:
             exec:
               command:
