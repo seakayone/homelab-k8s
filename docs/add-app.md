@@ -1,13 +1,13 @@
 # Adding a New App
 
-This guide walks through adding a new application to the cluster. There are two patterns depending on how the app is packaged:
+This guide walks through adding a new application to the cluster. There are two ways to register the app with ArgoCD, depending on how the app is packaged and what namespace it targets:
 
-- **Plain manifests / Kustomize** — put YAML under `manifests/<app>/` and register the app in the `root` ApplicationSet (`apps/root.yaml`). The ApplicationSet generates the `Application` for you.
-- **Helm chart** — create a standalone `apps/<app>/application.yaml` that references the chart repo. The ApplicationSet is **not** used here; the file is applied at cluster bootstrap via `manifests/argocd/apply.sh` (`kubectl apply -R -f apps/`).
+- **`root` ApplicationSet (`apps/root.yaml`)** — for plain-manifest (optionally Kustomize) apps where the target namespace matches the app name. Just append an entry to the list generator; the ApplicationSet templates the Application for you. Used today by: `argocd`, `authentik`, `mealie`, `vikunja`, `it-tools`, `homepage`, `paperless`.
+- **Standalone Application (`apps/<app>/application.yaml`)** — for Helm charts (e.g. `sealed-secrets`, `nfs-csi`, `loki`, `alloy`, `metrics-server`), multi-source apps (e.g. `monitoring` = Helm chart + extra manifests), or plain-manifest apps whose target namespace differs from the app name (e.g. `nfs-nas` → `kube-system`). These files are **not** picked up by the ApplicationSet; they are applied at cluster bootstrap via `manifests/argocd/apply.sh` (`kubectl apply -R -f apps/`).
 
 Both patterns share the remaining steps: optional Sealed Secrets, a Tailscale Ingress for access, and Homepage auto-discovery via Ingress annotations — no separate Homepage config edit needed.
 
-See [Example: it-tools](#example-it-tools) at the bottom for a complete worked example of the plain-manifest pattern, and [Example: Helm chart](#example-helm-chart) for the Helm pattern.
+See [Example: it-tools](#example-it-tools) at the bottom for a complete worked example of the ApplicationSet pattern, and [Example: Helm chart](#example-helm-chart) for the standalone-Application pattern.
 
 ---
 
@@ -63,7 +63,7 @@ Storage uses the default `nfs` StorageClass — no `storageClassName` needed in 
 
 ## 2. Register the app with ArgoCD
 
-### Plain manifests / Kustomize
+### Via the `root` ApplicationSet
 
 Add an entry to the `list` generator in `apps/root.yaml`:
 
@@ -72,11 +72,15 @@ Add an entry to the `list` generator in `apps/root.yaml`:
   path: manifests/<app>
 ```
 
-The `root` ApplicationSet uses this list to generate a matching `Application` for each entry. The generated Application syncs `manifests/<app>/` to a namespace named `<app>`, with `prune`, `selfHeal`, `CreateNamespace=true`, and `ServerSideApply=true` — so you don't need to create an `apps/<app>/application.yaml` file at all for this pattern.
+The `root` ApplicationSet uses this list to generate a matching `Application` for each entry. The generated Application syncs `manifests/<app>/` into a namespace named **`<app>`**, with `prune`, `selfHeal`, `CreateNamespace=true`, and `ServerSideApply=true`. If `manifests/<app>/kustomization.yaml` exists, ArgoCD applies the Kustomize build; otherwise it applies each YAML in the directory.
 
-### Helm chart
+You don't need to create an `apps/<app>/application.yaml` file for this pattern. It only works when the target namespace matches the app name — if that's not the case (or you need Helm / multi-source), use the standalone pattern below.
 
-Create `apps/<app>/application.yaml` referencing the chart directly:
+### Standalone Application
+
+Create `apps/<app>/application.yaml` directly. Use this for Helm charts, multi-source apps, or plain-manifest apps targeting a namespace that doesn't match the app name.
+
+**Helm chart:**
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -108,15 +112,35 @@ spec:
       - ServerSideApply=true
 ```
 
-Existing examples: `apps/sealed-secrets/`, `apps/nfs-csi/`, `apps/loki/`, `apps/alloy/`, `apps/monitoring/`, `apps/metrics-server/`.
+Existing Helm examples: `apps/sealed-secrets/`, `apps/nfs-csi/`, `apps/loki/`, `apps/alloy/`, `apps/metrics-server/`.
 
-**Bootstrap:** Helm-based Applications are not created by the ApplicationSet. They are applied to the cluster once via `manifests/argocd/apply.sh` (`kubectl apply -R -f apps/`). On an existing cluster, apply the new Application manually:
+**Multi-source (Helm + extra manifests):** use `spec.sources` instead of `spec.source` to combine a Helm chart with a directory of plain YAML. Useful when the chart doesn't cover everything you need — e.g. `apps/monitoring/application.yaml` pairs the `kube-prometheus-stack` chart with `manifests/monitoring/` (dashboards ConfigMap, Grafana backup CronJob, Grafana Ingress):
+
+```yaml
+sources:
+  - path: manifests/<app>
+    repoURL: https://github.com/seakayone/homelab-k8s.git
+    targetRevision: main
+  - chart: <chart-name>
+    repoURL: https://charts.example.com/
+    targetRevision: <version>
+    helm:
+      releaseName: <app>
+      values: |
+        # chart values here
+```
+
+**Plain-manifest, different namespace:** drop the `chart`/`helm` fields, keep a single `source:` pointing at `manifests/<app>`, and set `destination.namespace` to wherever the resources belong. `apps/nfs-nas/application.yaml` is an example — it syncs `manifests/nfs-nas/storageclass.yaml` into `kube-system`.
+
+**Bootstrap:** standalone Applications are not created by the ApplicationSet. They are applied to the cluster once via `manifests/argocd/apply.sh` (`kubectl apply -R -f apps/`). On an existing cluster, apply the new Application manually:
 
 ```bash
 kubectl apply -f apps/<app>/application.yaml
 ```
 
 After that, ArgoCD owns it and git is the source of truth.
+
+---
 
 ## 3. Sealed Secrets
 
@@ -359,4 +383,8 @@ kubectl apply -f apps/metrics-server/application.yaml
 
 From then on ArgoCD manages the chart release. On a fresh cluster the same file is picked up by `manifests/argocd/apply.sh`'s recursive apply, so no manual step is needed during a full rebuild.
 
-For a user-facing Helm app (e.g. one that ships with an Ingress), you can still annotate the Helm-managed Ingress via chart values — for example kube-prometheus-stack's `grafana.ingress.annotations`. If the chart's Ingress support is too limited, disable it in the chart values and add a standalone `manifests/<app>/ingress.yaml` under a *separate* plain-manifest Application (Kustomize pattern above) pointing at the same namespace.
+For a user-facing Helm app, you have three choices for the Ingress:
+
+1. **Annotate the chart's own Ingress** via chart values if the chart supports it (e.g. `grafana.ingress.annotations` in `kube-prometheus-stack`).
+2. **Multi-source**: disable the chart's Ingress and pair the chart with a plain-manifest source that includes your own `ingress.yaml`. This is what `apps/monitoring/application.yaml` does — see the multi-source snippet in [step 2](#2-register-the-app-with-argocd) and the actual Grafana Ingress in `manifests/monitoring/ingress.yaml`.
+3. **Separate Application** pointing at a different `manifests/<app>/` directory in the same namespace. Heavier — prefer option 2.
