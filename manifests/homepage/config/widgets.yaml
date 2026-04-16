@@ -15,7 +15,8 @@
     provider: custom
     name: Ecosia
     url: https://www.ecosia.org/search?q=
-    suggestionUrl: https://ac.ecosia.org/autocomplete?q=&type=list
+    suggestionUrl: https://ac.ecosia.org/autocomplete?type=list&q=
+    showSearchSuggestions: true
     target: _blank
 
 - openmeteo:
