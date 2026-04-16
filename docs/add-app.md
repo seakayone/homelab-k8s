@@ -1,6 +1,6 @@
 # Adding a New App
 
-This guide walks through adding a new application to the cluster. The pattern is: manifests in `manifests/<app>/`, an ArgoCD Application in `apps/<app>/application.yaml`, optional Sealed Secrets for credentials, a Tailscale Ingress for access, and an entry in the Homepage dashboard.
+This guide walks through adding a new application to the cluster. The pattern is: manifests in `manifests/<app>/`, an ArgoCD Application in `apps/<app>/application.yaml`, optional Sealed Secrets for credentials, and a Tailscale Ingress for access. The Homepage dashboard picks the app up automatically via Ingress annotations — no separate Homepage config edit needed.
 
 See [Example: it-tools](#example-it-tools) at the bottom for a complete worked example.
 
@@ -106,7 +106,7 @@ Briefly:
 
 ## 4. Tailscale Ingress
 
-To expose the app on the Tailnet, create `manifests/<app>/ingress.yaml`:
+To expose the app on the Tailnet, create `manifests/<app>/ingress.yaml`. The `gethomepage.dev/*` annotations make Homepage auto-discover the app and render it as a tile.
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -116,6 +116,14 @@ metadata:
   namespace: <app>
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: <Display Name>
+    gethomepage.dev/description: Short description
+    gethomepage.dev/group: Productivity        # or Infrastructure
+    gethomepage.dev/icon: <app>.png            # name from dashboard-icons or full URL
+    gethomepage.dev/href: https://<hostname>.lungfish-ide.ts.net
+    gethomepage.dev/app: <app>                 # deployment/pod label value for status
+    gethomepage.dev/pod-selector: app=<app>    # optional, for pod-level stats
 spec:
   ingressClassName: tailscale
   rules:
@@ -138,28 +146,21 @@ The `host` value becomes the subdomain: `<hostname>.lungfish-ide.ts.net`. For ex
 
 Set `tailscale.com/funnel: "true"` only if the service must be reachable from the public internet (outside the Tailnet).
 
+**Important:** The Ingress must live under `manifests/<app>/` (synced by the app's ArgoCD Application), not under `apps/<app>/`. Ingresses placed in `apps/<app>/` are not managed by any Application, so annotation changes won't reach the cluster.
+
 ---
 
-## 5. Add to Homepage
+## 5. Homepage auto-discovery
 
-Edit `manifests/homepage/config/services.yaml` and append an entry under the `Homelab` group:
+If you added the `gethomepage.dev/*` annotations in [step 4](#4-tailscale-ingress), no further action is needed — Homepage reads Ingress resources cluster-wide (see `manifests/homepage/config/kubernetes.yaml`) and populates tiles automatically. Groups (`Productivity`, `Infrastructure`, etc.) are created from the `gethomepage.dev/group` annotation; their ordering lives in `manifests/homepage/config/settings.yaml` under `layout:`.
 
-```yaml
-- Homelab:
-    # ... existing entries ...
-    - My App:
-        href: https://<hostname>.lungfish-ide.ts.net
-        description: Short description
-        icon: <app>.png   # or a URL; see https://gethomepage.dev/configs/services/
-```
-
-The Homepage ConfigMap is generated from this file via Kustomize `configMapGenerator`. Committing the change produces a new ConfigMap hash, which triggers a rolling restart of the Homepage pod so the new entry appears immediately.
-
-Icons are resolved from the [Dashboard Icons](https://github.com/walkxcode/dashboard-icons) library by name. Use a full URL if the app is not in that library:
+Icons are resolved from the [Dashboard Icons](https://github.com/homarr-labs/dashboard-icons) library by name (`<app>.png`). Use a full URL if the app is not in that library:
 
 ```yaml
-icon: https://example.com/logo.png
+gethomepage.dev/icon: https://example.com/logo.png
 ```
+
+Only edit `manifests/homepage/config/services.yaml` for services that have no Ingress (e.g., external links like Proxmox).
 
 ---
 
@@ -240,6 +241,14 @@ metadata:
   namespace: it-tools
   annotations:
     tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: IT-Tools
+    gethomepage.dev/description: Collection of handy online tools for developers
+    gethomepage.dev/group: Productivity
+    gethomepage.dev/icon: it-tools.png
+    gethomepage.dev/href: https://it-tools.lungfish-ide.ts.net
+    gethomepage.dev/app: it-tools
+    gethomepage.dev/pod-selector: app=it-tools
 spec:
   ingressClassName: tailscale
   rules:
@@ -285,13 +294,4 @@ spec:
       - CreateNamespace=true
 ```
 
-### Homepage entry (`manifests/homepage/config/services.yaml`)
-
-```yaml
-- IT-Tools:
-    href: https://it-tools.lungfish-ide.ts.net
-    description: Collection of handy online tools for developers
-    icon: it-tools.png
-```
-
-The app is accessible at `https://it-tools.lungfish-ide.ts.net` once ArgoCD syncs.
+The app is accessible at `https://it-tools.lungfish-ide.ts.net` once ArgoCD syncs. Homepage auto-discovers the tile from the Ingress annotations — no changes to `manifests/homepage/config/services.yaml` are required.
