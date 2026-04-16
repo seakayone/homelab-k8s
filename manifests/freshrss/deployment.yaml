@@ -15,6 +15,22 @@ spec:
       labels:
         app: freshrss
     spec:
+      initContainers:
+        - name: fix-permissions
+          image: busybox:1.37.0
+          command:
+            - sh
+            - -c
+            - |
+              set -eu
+              chown -R 100:101 /data
+              chmod -R u=rwX,g=rwX,o= /data
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
       containers:
         - name: freshrss
           image: freshrss/freshrss:1.28.1-alpine
