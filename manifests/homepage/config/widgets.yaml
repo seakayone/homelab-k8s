@@ -1,6 +1,27 @@
+- resources:
+    backend: kubernetes
+    expanded: true
+    cpu: true
+    memory: true
+    label: Cluster
+
+- kubernetes:
+    cluster:
+      show: true
+      cpu: true
+      memory: true
+      showLabel: true
+      label: Cluster
+    nodes:
+      show: true
+      cpu: true
+      memory: true
+      showLabel: true
+
 - search:
     provider: duckduckgo
     target: _blank
+
 - openmeteo:
     label: Current
     latitude: 36.66

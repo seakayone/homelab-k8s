@@ -1,37 +1,14 @@
-- Homelab:
+- Infrastructure:
     - ArgoCD:
         href: https://argocd.lungfish-ide.ts.net
         description: GitOps continuous delivery
         icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/argo-cd.png
         namespace: argocd
         app: argocd-server
-    - Grafana:
-        href: https://grafana.lungfish-ide.ts.net
-        description: Metrics and dashboards
-        icon: grafana.png
-        namespace: monitoring
-        app: grafana
-    - Mealie:
-        href: https://mealie.lungfish-ide.ts.net
-        description: Recipe manager
-        icon: mealie.png
-        namespace: mealie
-        app: mealie
-        podSelector: app=mealie
-    - IT-Tools:
-        href: https://it-tools.lungfish-ide.ts.net
-        description: Collection of handy online tools for developers
-        icon: it-tools.png
-        namespace: it-tools
-        app: it-tools
-        podSelector: app=it-tools
-    - Vikunja:
-        href: https://vikunja.lungfish-ide.ts.net
-        description: Project and task management
-        icon: vikunja.png
-        namespace: vikunja
-        app: vikunja
-        podSelector: app=vikunja
+    - Proxmox:
+        href: https://pve.lungfish-ide.ts.net:8006
+        description: Hypervisor management
+        icon: proxmox.png
     - Authentik:
         href: https://authentik.lungfish-ide.ts.net
         description: Identity provider and SSO
@@ -39,6 +16,28 @@
         namespace: authentik
         app: authentik-server
         podSelector: app=authentik-server
+    - Grafana:
+        href: https://grafana.lungfish-ide.ts.net
+        description: Metrics and dashboards
+        icon: grafana.png
+        namespace: monitoring
+        app: grafana
+
+- Productivity:
+    - Mealie:
+        href: https://mealie.lungfish-ide.ts.net
+        description: Recipe manager
+        icon: mealie.png
+        namespace: mealie
+        app: mealie
+        podSelector: app=mealie
+    - Vikunja:
+        href: https://vikunja.lungfish-ide.ts.net
+        description: Project and task management
+        icon: vikunja.png
+        namespace: vikunja
+        app: vikunja
+        podSelector: app=vikunja
     - Paperless:
         href: https://paperless.lungfish-ide.ts.net
         description: Document management system
@@ -46,7 +45,12 @@
         namespace: paperless
         app: paperless
         podSelector: app=paperless
-    - Proxmox:
-        href: https://pve.lungfish-ide.ts.net:8006
-        description: Hypervisor management
-        icon: proxmox.png
+
+- Tools:
+    - IT-Tools:
+        href: https://it-tools.lungfish-ide.ts.net
+        description: Collection of handy online tools for developers
+        icon: it-tools.png
+        namespace: it-tools
+        app: it-tools
+        podSelector: app=it-tools
