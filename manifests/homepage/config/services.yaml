@@ -3,30 +3,44 @@
         href: https://argocd.lungfish-ide.ts.net
         description: GitOps continuous delivery
         icon: https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/png/argo-cd.png
+        namespace: argocd
+        app: argocd-server
     - Grafana:
         href: https://grafana.lungfish-ide.ts.net
         description: Metrics and dashboards
         icon: grafana.png
+        namespace: monitoring
+        app: grafana
     - Mealie:
         href: https://mealie.lungfish-ide.ts.net
         description: Recipe manager
         icon: mealie.png
+        namespace: mealie
+        podSelector: app=mealie
     - IT-Tools:
         href: https://it-tools.lungfish-ide.ts.net
         description: Collection of handy online tools for developers
         icon: it-tools.png
+        namespace: it-tools
+        podSelector: app=it-tools
     - Vikunja:
         href: https://vikunja.lungfish-ide.ts.net
         description: Project and task management
         icon: vikunja.png
+        namespace: vikunja
+        podSelector: app=vikunja
     - Authentik:
         href: https://authentik.lungfish-ide.ts.net
         description: Identity provider and SSO
         icon: authentik.png
+        namespace: authentik
+        podSelector: app=authentik-server
     - Paperless:
         href: https://paperless.lungfish-ide.ts.net
         description: Document management system
         icon: paperless-ngx.png
+        namespace: paperless
+        podSelector: app=paperless
     - Proxmox:
         href: https://pve.lungfish-ide.ts.net:8006
         description: Hypervisor management
