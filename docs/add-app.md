@@ -1,8 +1,13 @@
 # Adding a New App
 
-This guide walks through adding a new application to the cluster. The pattern is: manifests in `manifests/<app>/`, an ArgoCD Application in `apps/<app>/application.yaml`, optional Sealed Secrets for credentials, and a Tailscale Ingress for access. The Homepage dashboard picks the app up automatically via Ingress annotations — no separate Homepage config edit needed.
+This guide walks through adding a new application to the cluster. There are two patterns depending on how the app is packaged:
 
-See [Example: it-tools](#example-it-tools) at the bottom for a complete worked example.
+- **Plain manifests / Kustomize** — put YAML under `manifests/<app>/` and register the app in the `root` ApplicationSet (`apps/root.yaml`). The ApplicationSet generates the `Application` for you.
+- **Helm chart** — create a standalone `apps/<app>/application.yaml` that references the chart repo. The ApplicationSet is **not** used here; the file is applied at cluster bootstrap via `manifests/argocd/apply.sh` (`kubectl apply -R -f apps/`).
+
+Both patterns share the remaining steps: optional Sealed Secrets, a Tailscale Ingress for access, and Homepage auto-discovery via Ingress annotations — no separate Homepage config edit needed.
+
+See [Example: it-tools](#example-it-tools) at the bottom for a complete worked example of the plain-manifest pattern, and [Example: Helm chart](#example-helm-chart) for the Helm pattern.
 
 ---
 
@@ -56,9 +61,22 @@ Storage uses the default `nfs` StorageClass — no `storageClassName` needed in 
 
 ---
 
-## 2. Add the ArgoCD Application
+## 2. Register the app with ArgoCD
 
-Create `apps/<app>/application.yaml`:
+### Plain manifests / Kustomize
+
+Add an entry to the `list` generator in `apps/root.yaml`:
+
+```yaml
+- app: <app>
+  path: manifests/<app>
+```
+
+The `root` ApplicationSet uses this list to generate a matching `Application` for each entry. The generated Application syncs `manifests/<app>/` to a namespace named `<app>`, with `prune`, `selfHeal`, `CreateNamespace=true`, and `ServerSideApply=true` — so you don't need to create an `apps/<app>/application.yaml` file at all for this pattern.
+
+### Helm chart
+
+Create `apps/<app>/application.yaml` referencing the chart directly:
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
@@ -71,21 +89,34 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/seakayone/homelab-k8s.git
-    targetRevision: main
-    path: manifests/<app>
+    repoURL: https://charts.example.com/      # chart repo URL
+    chart: <chart-name>
+    targetRevision: <version>
+    helm:
+      releaseName: <app>
+      values: |
+        # chart values here
   destination:
     server: https://kubernetes.default.svc
-    namespace: <app>
+    namespace: <target-namespace>
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
 ```
 
-The root app (`apps/root.yaml`) recurses the entire `apps/` directory, so ArgoCD picks this up automatically on the next sync — no other registration needed.
+Existing examples: `apps/sealed-secrets/`, `apps/nfs-csi/`, `apps/loki/`, `apps/alloy/`, `apps/monitoring/`, `apps/metrics-server/`.
+
+**Bootstrap:** Helm-based Applications are not created by the ApplicationSet. They are applied to the cluster once via `manifests/argocd/apply.sh` (`kubectl apply -R -f apps/`). On an existing cluster, apply the new Application manually:
+
+```bash
+kubectl apply -f apps/<app>/application.yaml
+```
+
+After that, ArgoCD owns it and git is the source of truth.
 
 ## 3. Sealed Secrets
 
@@ -175,9 +206,9 @@ manifests/it-tools/
   deployment.yaml
   service.yaml
   ingress.yaml
-apps/it-tools/
-  application.yaml
 ```
+
+**File edited:** `apps/root.yaml` — one new entry in the list generator. No `apps/it-tools/application.yaml` is needed; the ApplicationSet generates it.
 
 ### `manifests/it-tools/deployment.yaml`
 
@@ -267,31 +298,65 @@ spec:
         - it-tools
 ```
 
-### `apps/it-tools/application.yaml`
+### `apps/root.yaml` entry
+
+Add to the list under `spec.generators[0].list.elements`:
+
+```yaml
+- app: it-tools
+  path: manifests/it-tools
+```
+
+The `root` ApplicationSet templates this into a full Application pointing at `manifests/it-tools` in the `it-tools` namespace.
+
+The app is accessible at `https://it-tools.lungfish-ide.ts.net` once ArgoCD syncs. Homepage auto-discovers the tile from the Ingress annotations — no changes to `manifests/homepage/config/services.yaml` are required.
+
+---
+
+## Example: Helm chart
+
+[metrics-server](https://github.com/kubernetes-sigs/metrics-server) ships as a Helm chart and isn't user-facing, so it has no Ingress or Homepage tile — just a single `Application` that points at the upstream chart.
+
+**File created:** `apps/metrics-server/application.yaml`
 
 ```yaml
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: it-tools
+  name: metrics-server
   namespace: argocd
   finalizers:
     - resources-finalizer.argocd.argoproj.io
 spec:
   project: default
   source:
-    repoURL: https://github.com/seakayone/homelab-k8s.git
-    targetRevision: main
-    path: manifests/it-tools
+    repoURL: https://kubernetes-sigs.github.io/metrics-server/
+    chart: metrics-server
+    targetRevision: 3.12.2
+    helm:
+      releaseName: metrics-server
+      values: |
+        args:
+          - --kubelet-insecure-tls
+          - --kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname
   destination:
     server: https://kubernetes.default.svc
-    namespace: it-tools
+    namespace: kube-system
   syncPolicy:
     automated:
       prune: true
       selfHeal: true
     syncOptions:
       - CreateNamespace=true
+      - ServerSideApply=true
 ```
 
-The app is accessible at `https://it-tools.lungfish-ide.ts.net` once ArgoCD syncs. Homepage auto-discovers the tile from the Ingress annotations — no changes to `manifests/homepage/config/services.yaml` are required.
+**Bootstrap on the running cluster:**
+
+```bash
+kubectl apply -f apps/metrics-server/application.yaml
+```
+
+From then on ArgoCD manages the chart release. On a fresh cluster the same file is picked up by `manifests/argocd/apply.sh`'s recursive apply, so no manual step is needed during a full rebuild.
+
+For a user-facing Helm app (e.g. one that ships with an Ingress), you can still annotate the Helm-managed Ingress via chart values — for example kube-prometheus-stack's `grafana.ingress.annotations`. If the chart's Ingress support is too limited, disable it in the chart values and add a standalone `manifests/<app>/ingress.yaml` under a *separate* plain-manifest Application (Kustomize pattern above) pointing at the same namespace.
