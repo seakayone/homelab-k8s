@@ -15,6 +15,14 @@ fullWidth: false
 cardBlur: md
 hideVersion: true
 target: _blank
+statusStyle: dot
+useEqualHeights: true
+
+quicklaunch:
+  searchDescriptions: true
+  hideInternetSearch: false
+  showSearchSuggestions: true
+  hideVisitURL: false
 
 layout:
   Productivity:
