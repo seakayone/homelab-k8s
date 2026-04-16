@@ -22,6 +22,8 @@ spec:
             path: manifests/homepage
           - app: paperless
             path: manifests/paperless
+          - app: freshrss
+            path: manifests/freshrss
   template:
     metadata:
       name: "{{.app}}"

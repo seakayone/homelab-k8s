@@ -1,0 +1,31 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: freshrss
+  namespace: freshrss
+  annotations:
+    tailscale.com/funnel: "false"
+    gethomepage.dev/enabled: "true"
+    gethomepage.dev/name: FreshRSS
+    gethomepage.dev/description: Self-hosted RSS feed aggregator
+    gethomepage.dev/group: Productivity
+    gethomepage.dev/icon: freshrss.png
+    gethomepage.dev/href: https://freshrss.lungfish-ide.ts.net
+    gethomepage.dev/app: freshrss
+    gethomepage.dev/pod-selector: app=freshrss
+spec:
+  ingressClassName: tailscale
+  rules:
+    - host: freshrss
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: freshrss
+                port:
+                  number: 80
+  tls:
+    - hosts:
+        - freshrss
