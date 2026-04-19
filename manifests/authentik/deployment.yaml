@@ -6,6 +6,7 @@ metadata:
   labels:
     app: authentik-postgres
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -74,6 +75,7 @@ metadata:
   labels:
     app: authentik-redis
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -130,6 +132,7 @@ metadata:
   labels:
     app: authentik-server
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -248,6 +251,7 @@ metadata:
   labels:
     app: authentik-worker
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:

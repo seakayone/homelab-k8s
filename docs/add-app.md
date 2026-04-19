@@ -35,6 +35,7 @@ metadata:
   labels:
     app: <app>
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -58,6 +59,8 @@ spec:
 ```
 
 Storage uses the default `nfs` StorageClass — no `storageClassName` needed in PVCs.
+
+`revisionHistoryLimit: 2` caps the number of old ReplicaSets Kubernetes retains after rollouts (default is 10). Git revert is the canonical rollback path, so 2 keeps cleanup tight while leaving one prior revision for an emergency `kubectl rollout undo`. Set this on every Deployment.
 
 ---
 
@@ -245,6 +248,7 @@ metadata:
   labels:
     app: it-tools
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:

@@ -6,6 +6,7 @@ metadata:
   labels:
     app: paperless
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -140,6 +141,7 @@ metadata:
   labels:
     app: paperless-postgres
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -208,6 +210,7 @@ metadata:
   labels:
     app: paperless-redis
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -258,6 +261,7 @@ metadata:
   labels:
     app: paperless-gotenberg
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
@@ -291,6 +295,7 @@ metadata:
   labels:
     app: paperless-tika
 spec:
+  revisionHistoryLimit: 2
   replicas: 1
   selector:
     matchLabels:
