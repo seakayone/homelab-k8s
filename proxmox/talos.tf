@@ -1,6 +1,9 @@
 locals {
-  cp_ip            = [for addr in flatten(proxmox_virtual_environment_vm.talos_control_plane.ipv4_addresses) : addr if addr != "127.0.0.1" && !startswith(addr, "169.254.") && !startswith(addr, "10.244.")][0]
-  worker_ips       = [for vm in proxmox_virtual_environment_vm.talos_worker : [for addr in flatten(vm.ipv4_addresses) : addr if addr != "127.0.0.1" && !startswith(addr, "169.254.") && !startswith(addr, "10.244.")][0]]
+  cp_static_ip      = "192.168.178.201"
+  worker_static_ips = ["192.168.178.202"]
+
+  cp_ip            = local.cp_static_ip
+  worker_ips       = local.worker_static_ips
   cluster_endpoint = "https://${local.cp_ip}:6443"
 
   coredns_corefile = <<-EOT
@@ -69,10 +72,24 @@ resource "talos_machine_configuration_apply" "controlplane" {
   node                        = local.cp_ip
   config_patches = [
     yamlencode({
+      machine = {
+        network = {
+          interfaces = [{
+            interface = "ens18"
+            dhcp      = false
+            addresses = ["${local.cp_static_ip}/24"]
+            routes = [{
+              network = "0.0.0.0/0"
+              gateway = var.network_gateway
+            }]
+          }]
+          nameservers = [var.network_gateway]
+        }
+      }
       cluster = {
         inlineManifests = [
           {
-            name     = "coredns-config"
+            name = "coredns-config"
             contents = yamlencode({
               apiVersion = "v1"
               kind       = "ConfigMap"
@@ -97,6 +114,24 @@ resource "talos_machine_configuration_apply" "worker" {
   client_configuration        = talos_machine_secrets.this.client_configuration
   machine_configuration_input = data.talos_machine_configuration.worker.machine_configuration
   node                        = local.worker_ips[count.index]
+  config_patches = [
+    yamlencode({
+      machine = {
+        network = {
+          interfaces = [{
+            interface = "ens18"
+            dhcp      = false
+            addresses = ["${local.worker_static_ips[count.index]}/24"]
+            routes = [{
+              network = "0.0.0.0/0"
+              gateway = var.network_gateway
+            }]
+          }]
+          nameservers = [var.network_gateway]
+        }
+      }
+    })
+  ]
 }
 
 resource "talos_machine_bootstrap" "this" {

@@ -78,8 +78,8 @@ resource "terraform_data" "nfs_provisioner" {
     command = "bash ${path.module}/../scripts/provision-nfs.sh"
 
     environment = {
-      SSH_KEY_PATH   = pathexpand(var.ssh_private_key_path)
-      NFS_SERVER_IP  = "192.168.178.200"
+      SSH_KEY_PATH    = pathexpand(var.ssh_private_key_path)
+      NFS_SERVER_IP   = "192.168.178.200"
       NFS_SERVER_USER = "debian"
     }
   }
